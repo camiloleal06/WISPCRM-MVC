@@ -1,4 +1,4 @@
-name: Deploy to VPS
+name: Desplegar a VPS - Ionos
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
     environment: VPS_SSH_KEY
 
     steps:
-      - name: Checkout repository
+      - name: Recuperando código del repositorio
         uses: actions/checkout@v3
 
       - name: Set up JDK 17
@@ -21,10 +21,10 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build with Maven
+      - name: Compilando y empaquetando el proyecto
         run: mvn clean package -DskipTests
 
-      - name: Copy JAR to VPS
+      - name: Copiando archivos jar al Servidor VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -33,7 +33,7 @@ jobs:
           source: "target/*.jar"
           target: "~/wispcrm/"
 
-      - name: Restart service on VPS
+      - name: Reiniciando Servicio
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.VPS_HOST }}

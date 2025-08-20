@@ -13,21 +13,26 @@ jobs:
     environment: VPS_SSH_KEY
 
     steps:
+      # 1️⃣ Recuperar código
       - name: Recuperando código del repositorio
         uses: actions/checkout@v3
 
+      # 2️⃣ Configurar Java 17
       - name: Configurando Java 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
 
+      # 3️⃣ Dar permisos a mvnw
       - name: Dar permisos a mvnw
         run: chmod +x mvnw
 
+      # 4️⃣ Compilar y empaquetar Maven
       - name: Compilando y empaquetando el proyecto
         run: ./mvnw clean package -DskipTests
 
+      # 5️⃣ Copiar JAR al VPS
       - name: Copiando archivos jar al Servidor VPS
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -37,6 +42,7 @@ jobs:
           source: "target/*.jar"
           target: "~/wispcrm/"
 
+      # 6️⃣ Reiniciar servicio en VPS
       - name: Reiniciando Servicio
         uses: appleboy/ssh-action@v0.1.10
         with:

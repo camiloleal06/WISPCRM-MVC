@@ -13,13 +13,6 @@ jobs:
     environment: VPS_SSH_KEY
 
     steps:
-      - name: Listar recursos
-        run: |
-          echo "Templates:"
-          ls -R src/main/resources/templates
-          echo "Static:"
-          ls -R src/main/resources/static
-
       # 1️⃣ Recuperar código
       - name: Recuperando código del repositorio
         uses: actions/checkout@v3

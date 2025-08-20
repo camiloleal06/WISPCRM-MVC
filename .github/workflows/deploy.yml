@@ -23,7 +23,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Compilando y empaquetando el proyecto
-        run: mvn clean package -DskipTests
+        run: mvn package -DskipTests
 
       - name: Copiando archivos jar al Servidor VPS
         uses: appleboy/scp-action@v0.1.7

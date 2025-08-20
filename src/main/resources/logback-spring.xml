@@ -1,0 +1,29 @@
+<configuration>
+    <appender name="ELASTIC" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>localhost:5000</destination> <!-- puerto donde Logstash escucha -->
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <fieldName>@timestamp</fieldName>
+                </timestamp>
+                <pattern>
+                    <pattern>
+                        {
+                        "level": "%level",
+                        "thread": "%thread",
+                        "logger": "%logger",
+                        "message": "%message",
+                        "exception": "%ex{full}"
+                        }
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="ELASTIC"/>
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>
+

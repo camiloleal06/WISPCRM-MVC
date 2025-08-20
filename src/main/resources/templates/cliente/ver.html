@@ -1,0 +1,98 @@
+<html xmlns:th="http://thymeleaf.org">
+
+<head th:replace="layout/layout :: head">
+
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+	<div class="wrapper">
+		<nav th:replace="layout/layout :: menu"></nav>
+		<aside th:replace="layout/layout :: sidebar"></aside>
+		<div class="content-wrapper">
+
+			<!-- Content Header (Page header) -->
+			<div class="content-header">
+				<div class="container-fluid">
+					<div class="row mb-2">
+						<div class="col-sm-6">
+							<h1 class="m-0 text-dark">Información Cliente</h1>
+						</div>
+						<!-- /.col -->
+						<div class="col-sm-6">
+							<ol class="breadcrumb float-sm-right">
+								<li class="breadcrumb-item"><a th:href="@{/}">Inicio</a></li>
+								<li class="breadcrumb-item active">Detalles</li>
+							</ol>
+						</div><!-- /.col -->
+					</div><!-- /.row -->
+				</div><!-- /.container-fluid -->
+			</div>
+
+			<!-- Main content -->
+			<section class="content">
+				<div class="container-fluid">
+					<div class="row">
+						<!-- left column -->
+						<div class="col-md-12">
+							<!-- general form elements -->
+							<div class="card card-primary">
+								<ul class="list-group">
+									<li class="list-group-item"
+										th:text="'Cliente : '+${cliente.nombres}+' '+${cliente.apellidos} "></li>
+									<li class="list-group-item" th:text="${cliente.email}"></li>
+									<li class="list-group-item" th:text="${cliente.telefono}"></li>
+									<li class="list-group-item" th:text="${cliente.direccion}"></li>
+									<li class="list-group-item" th:text="${cliente.planes.nombre}"></li>
+									<li class="list-group-item" th:text="'Fecha de Creacion : '+${cliente.createAt}">
+									</li>
+								</ul>
+				<table th:if="${not #lists.isEmpty(facturas)}"
+					class="table table-bordered table-striped my-4">
+					<thead class="primary">
+						<tr>
+							<th>#</th>
+							<th>Estado</th>
+							<th>Total</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="factura: ${facturas}">
+							<td th:text="${factura.id}"></td>
+							<td>
+							<th:block th:if="${factura.estado eq true}"><span class="badge bg-warning">Pendiente</span></th:block>
+                            <th:block th:unless="${factura.estado eq  true}"><span class="badge bg-primary">Pagada</span></th:block>
+							</td>
+							<td th:text="${factura.valor}"></td>
+            <td>
+					<th:block th:unless="${factura.estado eq  true}">														
+					<a class="btn btn-success btn-sm" 
+					     th:href="@{'descargarpago/' + ${factura.id}}" 
+					      th:text="'Recibo'" >
+							 </a>
+					 </th:block>	
+			</td>
+
+						</tr>
+					</tbody>
+
+				</table>
+
+			</div>
+							<!-- /.card -->
+						</div>
+					</div>
+				</div>
+			</section>
+			</div>
+	</div>
+  <footer th:replace="layout/layout :: footer"></footer>
+   
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
+
+</body>
+</html>

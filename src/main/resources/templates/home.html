@@ -1,0 +1,111 @@
+<html xmlns:th="http://thymeleaf.org">
+
+<head th:replace="layout/layout :: head">
+
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+	<div class="wrapper">
+		<nav th:replace="layout/layout :: menu"></nav>
+		<aside th:replace="layout/layout :: sidebar"></aside>
+		<div class="content-wrapper">
+
+			<!-- Content Header (Page header) -->
+			<div class="content-header">
+				<div class="container-fluid">
+					<div class="row mb-2">
+						<div class="col-sm-6">
+							<h1 class="m-0 text-dark">Datos del Mes</h1>
+						</div>
+						<!-- /.col -->
+						<!-- /.col -->
+					</div><!-- /.row -->
+				</div><!-- /.container-fluid -->
+			</div>
+			<!-- /.content-header -->
+
+			<!-- Main content -->
+			<section class="content">
+				<div class="container-fluid">
+					<div class="row">
+						<div class="col-lg-3 col-6">
+							<!-- small box -->
+							<div class="small-box bg-info">
+								<div class="inner">
+									<h3 th:text="${cantidadfacturaspendientesmes}"></h3>
+
+									<p>Facturas Pendientes</p>
+								</div>
+								<div class="icon">
+									<i class="ion ion-bag"></i>
+								</div>
+								<a th:href="@{/listarfactura}" class="small-box-footer">Mas info <i
+										class="fas fa-arrow-circle-right"></i></a>
+							</div>
+						</div>
+						<!-- ./col -->
+						<div class="col-lg-3 col-6">
+							<!-- small box -->
+							<div class="small-box bg-success">
+								<div class="inner">
+									<h3 th:text="${totalpagadasmes}"></h3>
+									<p>Total Pagado MES</p>
+								</div>
+								<div class="icon">
+									<i class="ion ion-calculator"></i>
+								</div>
+								<a href="#" class="small-box-footer">Mas Info <i
+										class="fas fa-arrow-circle-right"></i></a>
+							</div>
+						</div>
+						<!-- ./col -->
+						<div class="col-lg-3 col-6">
+							<!-- small box -->
+							<div class="small-box bg-primary">
+								<div class="inner">
+									<h3 th:text="${#numbers.formatInteger(numeroclientes,0)}"></h3>
+
+									<p>Clientes Registrados</p>
+								</div>
+								<div class="icon">
+									<i class="ion ion-person-add"></i>
+								</div>
+								<a th:href="@{/listar}" class="small-box-footer">Mas info <i
+										class="fas fa-arrow-circle-right"></i></a>
+							</div>
+						</div>
+
+						<!-- ./col -->
+						<div class="col-lg-3 col-6">
+
+							<!-- small box -->
+							<div class="small-box bg-danger">
+								<div class="inner">
+									<h3 th:text="${totalpendientemes}"> </h3>
+
+									<p>Total por Cobrar</p>
+								</div>
+								<div class="icon">
+									<i class="ion ion-arrow-graph-up-right"></i>
+								</div>
+								<a href="#" class="small-box-footer">More info <i
+										class="fas fa-arrow-circle-right"></i></a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			
+		</div>
+		<footer th:replace="layout/layout :: footer"></footer>
+
+		<!-- Control Sidebar -->
+		<aside class="control-sidebar control-sidebar-dark">
+			<!-- Control sidebar content goes here -->
+		</aside>
+		<!-- /.control-sidebar -->
+	</div>
+
+</body>
+
+</html>

@@ -1,0 +1,89 @@
+<html xmlns:th="http://thymeleaf.org">
+<head th:replace="layout/layout :: head">
+
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+<nav th:replace="layout/layout :: menu"></nav>
+ <aside th:replace="layout/layout :: sidebar"></aside>
+  <div class="content-wrapper">
+
+  <!-- Content Header (Page header) -->
+    <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0 text-dark">Dashboard</h1>
+          </div>
+          <!-- /.col -->
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Dashboard v1</li>
+            </ol>
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <section class="content">
+				<div class="container-fluid">
+					<div class="row">
+						<!-- left column -->
+						<div class="col-md-12">
+							<!-- general form elements -->
+							<div class="card card-primary">
+								<div class="card-header">
+									<h3 class="card-title" th:text="${titulo}"></h3>
+								</div>
+								<!-- /.card-header -->
+								<!-- form start -->
+								<form data-toggle="validator" role="form" th:object="${plan}"
+										th:action="@{/saveplan}" method="post">
+										<input type="hidden" th:field="*{id}" />
+										<div class="form-group col-md-12"  >
+											<label for="nombreplan">Plan</label> <input type="text"
+												required class="form-control" th:field="*{nombre}"
+												id="nombre" />
+										</div>
+										<div class="form-group col-md-12">
+											<label for="subida">Velocidad Subida</label> <input
+												type="text" required class="form-control"
+												th:field="*{subida}" id="subida" />
+										</div>
+										<div class="form-group col-md-12">
+											<label for="descarga">Velocidad Descarga</label> <input
+												type="text" required class="form-control"
+												th:field="*{descarga}" id="descarga" />
+										</div>
+										<div class="form-group col-md-12">
+											<label for="descarga">Precio Plan</label> <input
+												type="number" required class="form-control"
+												th:field="*{precio}" id="precio" />
+										</div>
+										<div class="box-footer col-md-12">
+											<button class="btn btn-primary" type="submit">Guardar</button>
+										</div>
+									</form>
+								
+							</div>
+							<!-- /.card -->
+						</div>
+					</div>
+				</div>
+			</section>
+     </div>
+      <footer th:replace="layout/layout :: footer"></footer>
+   
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
+
+    
+</div>
+</body>
+</html>

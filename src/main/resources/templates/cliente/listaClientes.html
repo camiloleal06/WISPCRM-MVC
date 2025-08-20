@@ -1,0 +1,273 @@
+<html xmlns:th="http://thymeleaf.org">
+
+<head th:replace="layout/layout :: head">
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+	<div class="wrapper">
+		<nav th:replace="layout/layout :: menu"></nav>
+		<aside th:replace="layout/layout :: sidebar"></aside>
+		<div class="content-wrapper">
+
+			<!-- Content Header (Page header) -->
+			<div class="content-header">
+
+				<div id="notificacion" class="alert alert-success alert-dismissible fade show" role="alert"
+					th:if="${success != null}">
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true" th:text="x"></span>
+					</button>
+					<strong th:text="${success}"></strong>
+				</div>
+
+				<div id="notificacion" class="alert alert-danger alert-dismissible fade show" role="alert"
+					th:if="${error != null}">
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">X</span>
+					</button>
+					<strong th:text="${error}"></strong>
+				</div>
+
+				<div id="notificacion" class="alert alert-info alert-dismissible fade show" role="alert"
+					th:if="${info != null}">
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true" th:text="x"></span>
+					</button>
+					<strong th:text="${info}"></strong>
+				</div>
+
+				<div id="notificacion" class="alert alert-warning alert-dismissible fade show" role="alert"
+					th:if="${warning != null}">
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">X</span>
+					</button>
+					<strong th:text="${warning}"></strong>
+				</div>
+
+
+				<div class="container-fluid">
+					<div class="row mb-2">
+						<div class="col-sm-6">
+							<h1 class="m-0 text-dark">Listado de Clientes 2</h1>
+						</div>
+						<!-- /.col -->
+						<div class="col-sm-6">
+							<ol class="breadcrumb float-sm-right">
+								<li class="breadcrumb-item"><a th:href="@{/}">Inicio</a></li>
+								<li class="breadcrumb-item active">Lista de Clientes</li>
+							</ol>
+						</div>
+						<!-- /.col -->
+					</div>
+					<!-- /.row -->
+				</div>
+				<!-- /.container-fluid -->
+			</div>
+			<!-- /.content-header -->
+
+			<!-- Main content -->
+			<section class="content">
+				<div class="container-fluid">
+					<div class="row">
+						<div class="col-12">
+							<div class="card">
+								<div class="card-header">
+									<h3 class="card-title">Listado de Clientes 2</h3>
+									<div style="display: flex; justify-content: flex-end">
+										<a th:href="@{/facturar}" th:text="'Facturar'" class="btn btn-primary "></a>
+									</div>
+								</div>
+
+								<!-- /.card-header -->
+								<div class="card-body">
+									<table class="table table-bordered table-striped">
+										<thead>
+											<form th:action="@{/listarclientes}">
+												<div class="form-row col-md-12">
+													<div class="form-group col-md-6">
+														<input type="text" name="keyword" id="keyword" size="50"
+															th:value="${keyword}" class="form-control" required />
+													</div>
+													<div class="form-group col-md-6">
+														<input type="submit" value="Buscar"
+															class="btn btn-primary  btn-icon" />
+														<input type="button" value="Clear" id="btnClear"
+															class="btn btn-warning " onclick="clearSearch()" />
+													</div>
+												</div>
+											</form>
+											<tr>
+
+												<th>Nombres</th>
+												<th>Telefono</th>
+												<th>Email</th>
+												<th></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr th:each="clientes:${cliente}">
+												<td th:text="${clientes.nombres} +' '+ ${clientes. apellidos}"></td>
+												<td th:text="${clientes.telefono}"></td>
+												<td th:text="${clientes.email}"></td>
+												<td><a th:href="@{/vercliente(id=${clientes.id})}"
+														class="btn btn-success btn-rounded btn-icon ">
+														<i class="fas fa-eye"></i>
+
+													</a>
+
+
+
+													<a th:href="@{/factura(clienteID=${clientes.id})}"
+														class="btn btn-primary btn-rounded btn-icon ">
+														<i class="fas fa-file-invoice"></i>
+													</a>
+
+
+													<a th:href="@{/editar(id=${clientes.id})}"
+														class="btn btn-warning btn btn-rounded btn-icon ">
+														<i class="fas fa-user-edit"></i></a>
+													<a th:onclick="eliminar([[${clientes.id}]])"
+														class="btn btn-danger btn-rounded btn-icon ">
+														<i class="fas fa-user-minus"></i>
+													</a>
+												</td>
+											</tr>
+										</tbody>
+								
+									</table>
+	<nav aria-label="Page navigation example">
+  <ul class="pagination justify-content-center">
+    <li class="page-item disabled">
+      <a class="page-link" href="#" tabindex="-1">Previous</a>
+    </li>
+    <li class="page-item"><a class="page-link" href="#">1</a></li>
+    <li class="page-item"><a class="page-link" href="#">2</a></li>
+    <li class="page-item"><a class="page-link" href="#">3</a></li>
+    <li class="page-item">
+      <a class="page-link" href="#">Next</a>
+    </li>
+  </ul>
+</nav>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+		</div>
+		<footer th:replace="layout/layout :: footer"></footer>
+	</div>
+	<!-- DataTables -->
+	<script src="plugins/datatables/jquery.dataTables.min.js"></script>
+	<script src="plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+	<script src="plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+	<script src="plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+	<script src="/dist/js/sweetalert.min.js"></script>
+	<script type="text/javascript">
+		function clearSearch() {
+			window.location = "[[@{/listarclientes}]]";
+		}
+	</script>
+	<script>
+		$(function () {
+			$("#example1").DataTable({
+				"responsive": true,
+				"autoWidth": true,
+				"ordering": true,
+				"paging": true,
+				"searching": true,
+				"info": true,
+				"responsive": true,
+				"language": {
+
+					"sProcessing": "Procesando...",
+					"sLengthMenu": "Mostrar _MENU_ registros",
+					"sZeroRecords": "No se encontraron resultados",
+					"sEmptyTable": "Ning�n dato disponible en esta tabla",
+					"sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+					"sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+					"sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+					"sInfoPostFix": "",
+					"sSearch": "Buscar:",
+					"sUrl": "",
+					"sInfoThousands": ",",
+					"sLoadingRecords": "Cargando...",
+					"oPaginate": {
+						"sFirst": "Primero",
+						"sLast": "�ltimo",
+						"sNext": "Siguiente",
+						"sPrevious": "Anterior"
+					},
+					"oAria": {
+						"sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+						"sSortDescending": ": Activar para ordenar la columna de manera descendente"
+
+					}
+				}
+
+
+			}
+
+
+			);
+			$('#example2').DataTable({
+				"paging": true,
+				"lengthChange": false,
+				"searching": false,
+				"ordering": true,
+				"info": true,
+				"autoWidth": false,
+				"responsive": true,
+			});
+		});
+	</script>
+
+	<script th:inline="javascript">
+		/*[+
+			$(function() {
+				$("#model").load('/ajax/brands', $("#brand").serialize());
+				$('#brand').on('change', function() {
+					$("#model").load('/ajax/brands', $("#brand").serialize());
+				});
+			});
+	+]*/
+	</script>
+	<script>
+		$(document).ready(function () {
+			$('#notificacion').fadeOut(4000); // 5 seconds x 1000 milisec = 5000 milisec
+		});
+	</script>
+
+	<script type="text/javascript">
+		function eliminar(id) {
+			console.log(id);
+			swal({
+				title: "Esta seguro de Eliminar?",
+				text: "Se eliminara el cliente y sus facturas. Una vez eliminado no se prodra restablecer!",
+				icon: "warning",
+				buttons: true,
+				dangerMode: true,
+			})
+				.then((OK) => {
+					if (OK) {
+						$.ajax({
+							url: "/eliminar/" + id,
+							success: function (res) {
+								console.log(res);
+							},
+						});
+						swal("Poof! Registro eliminado!", {
+							icon: "success",
+						}).then((ok) => {
+							if (ok) {
+								location.href = "/listar";
+							}
+						});
+					}
+				});
+		}
+	</script>
+
+</body>
+
+</html>

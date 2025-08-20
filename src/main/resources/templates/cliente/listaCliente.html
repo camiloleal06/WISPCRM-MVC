@@ -1,0 +1,370 @@
+<html xmlns:th="http://thymeleaf.org">
+
+<head th:replace="layout/layout :: head">
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+	<div class="wrapper">
+		<nav th:replace="layout/layout :: menu"></nav>
+		<aside th:replace="layout/layout :: sidebar"></aside>
+		<div class="content-wrapper">
+
+			<!-- Content Header (Page header) -->
+			<div class="content-header">
+
+				<div id="notificacion" class="alert alert-success alert-dismissible fade show" role="alert"
+					th:if="${success != null}">
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true" th:text="x"></span>
+					</button>
+					<strong th:text="${success}"></strong>
+				</div>
+
+				<div id="notificacion" class="alert alert-danger alert-dismissible fade show" role="alert"
+					th:if="${error != null}">
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">X</span>
+					</button>
+					<strong th:text="${error}"></strong>
+				</div>
+
+				<div id="notificacion" class="alert alert-info alert-dismissible fade show" role="alert"
+					th:if="${info != null}">
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true" th:text="x"></span>
+					</button>
+					<strong th:text="${info}"></strong>
+				</div>
+
+				<div id="notificacion" class="alert alert-warning alert-dismissible fade show" role="alert"
+					th:if="${warning != null}">
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">X</span>
+					</button>
+					<strong th:text="${warning}"></strong>
+				</div>
+
+
+				<div class="container-fluid">
+					<div class="row mb-2">
+						<div class="col-sm-6">
+							<h1 class="m-0 text-dark">Listado de Clientes</h1>
+						</div>
+						<!-- /.col -->
+						<div class="col-sm-6">
+							<ol class="breadcrumb float-sm-right">
+								<li class="breadcrumb-item"><a th:href="@{/}">Inicio</a></li>
+								<li class="breadcrumb-item active">Lista de Clientes</li>
+							</ol>
+						</div>
+						<!-- /.col -->
+					</div>
+					<!-- /.row -->
+				</div>
+				<!-- /.container-fluid -->
+			</div>
+			<!-- /.content-header -->
+
+			<!-- Main content -->
+			<section class="content">
+				<div class="container-fluid">
+					<div class="row">
+						<div class="col-12">
+							<div class="card">
+								<div class="card-header">
+									<h3 class="card-title">Listado de Clientes</h3>
+									<div style="display: flex; justify-content: flex-end">
+										<a th:href="@{/facturar}" th:text="'Facturar'" class="btn btn-primary "></a>
+									</div>
+
+									<div style="display: flex; justify-content: flex-end">
+										<a th:href="@{/notificar}" th:text="'Notificar'" class="btn btn-primary "></a>
+									</div>
+								</div>
+
+								<!-- /.card-header -->
+								<div class="card-body">
+									<table id="example1" class="table table-bordered table-striped">
+										<thead class="cf">
+											<tr>
+												<th>Nombres</th>
+												<th>Telefono</th>
+												<th>Plan</th>
+												<th>Estado</th>
+												<th></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr th:each="clientes:${cliente}">
+												<td th:text="${clientes.nombres}"></td>
+												<td th:text="${clientes.telefono}"></td>
+												<td th:text="${clientes.valor}"></td>
+												<td>
+													<th:block
+														th:if="${clientes.estado == T(org.wispcrm.modelo.EstadoCliente).ACTIVO}">
+														<span class="badge bg-success">Activo</span>
+													</th:block>
+
+													<th:block
+														th:if="${clientes.estado == T(org.wispcrm.modelo.EstadoCliente).INACTIVO}">
+														<span class="badge bg-warning">Inactivo</span>
+													</th:block>
+
+													<th:block
+														th:if="${clientes.estado == T(org.wispcrm.modelo.EstadoCliente).SUSPENDIDO}">
+														<span class="badge bg-danger">Suspendido</span>
+													</th:block>
+												</td>
+
+												<td>
+													<th:block
+														th:if="${clientes.estado == T(org.wispcrm.modelo.EstadoCliente).ACTIVO}">
+														<a th:href="@{/vercliente(id=${clientes.id})}" class="btn btn-info btn-rounded btn-icon 
+														data-toggle=" tooltip" data-placement="center" title="Detalle cliente"">
+														<em class=" fas fa-eye"></em></a>
+													</th:block>
+
+													<th:block
+														th:if="${clientes.estado == T(org.wispcrm.modelo.EstadoCliente).ACTIVO}">
+														<a th:href="@{'facturar/' + ${clientes.id}}" class="btn btn-success btn-rounded btn-icon  
+														data-toggle=" tooltip" data-placement="center" title="Facturar"">
+														<em class=" fas fa-file-invoice"></em>
+														</a>
+													</th:block>
+
+													<a th:href="@{/editar(id=${clientes.id})}" class="btn btn-warning btn btn-rounded btn-icon 
+														data-toggle=" tooltip" data-placement="center" title="Editar cliente"">
+														<em class=" fas fa-user-edit"></em></a>
+
+													<th:block
+														th:if="${clientes.estado == T(org.wispcrm.modelo.EstadoCliente).ACTIVO || clientes.estado == T(org.wispcrm.modelo.EstadoCliente).SUSPENDIDO}">
+														<a th:onclick="eliminarCliente([[${clientes.id}]])" class="btn btn-danger btn-rounded btn-icon
+														data-toggle=" tooltip" data-placement="center" title="Eliminar cliente"">
+														<em class=" fas fa-user-minus"></em>
+														</a>
+													</th:block>
+
+
+													<th:block
+														th:if="${clientes.estado == T(org.wispcrm.modelo.EstadoCliente).INACTIVO}">
+														<a th:onclick="reactivarCliente([[${clientes.id}]])" class="btn btn-success btn-rounded btn-icon
+														data-toggle=" tooltip" data-placement="center" title="Reactivar cliente"">
+														<em class=" fas fa-user-plus"></em>
+														</a>
+													</th:block>
+
+													<a th:href="@{/orden(clienteID=${clientes.id})}" class="btn btn-primary btn-rounded btn-icon  
+														data-toggle=" tooltip" data-placement="center" title="Orden de Trabajo"">
+													<em class=" fas fa-briefcase"></em>
+													</a>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<footer th:replace="layout/layout :: footer"></footer>
+		</div>
+		<!-- DataTables -->
+		<script src="plugins/datatables/jquery.dataTables.min.js"></script>
+		<script src="plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+		<script src="plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+		<script src="plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+		<script src="/dist/js/sweetalert.min.js"></script>
+
+		<script>
+			$(function () {
+				$("#example1").DataTable({
+					"responsive": true,
+					"autoWidth": true,
+					"ordering": true,
+					"paging": true,
+					"searching": true,
+					"info": true,
+					"responsive": true,
+					"language": {
+
+						"sProcessing": "Procesando...",
+						"sLengthMenu": "Mostrar _MENU_ registros",
+						"sZeroRecords": "No se encontraron resultados",
+						"sEmptyTable": "Ning�n dato disponible en esta tabla",
+						"sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+						"sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+						"sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+						"sInfoPostFix": "",
+						"sSearch": "Buscar:",
+						"sUrl": "",
+						"sInfoThousands": ",",
+						"sLoadingRecords": "Cargando...",
+						"oPaginate": {
+							"sFirst": "Primero",
+							"sLast": "�ltimo",
+							"sNext": "Siguiente",
+							"sPrevious": "Anterior"
+						},
+						"oAria": {
+							"sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+							"sSortDescending": ": Activar para ordenar la columna de manera descendente"
+
+						}
+					}
+
+
+				}
+
+
+				);
+				$('#example2').DataTable({
+					"paging": true,
+					"lengthChange": false,
+					"searching": false,
+					"ordering": true,
+					"info": true,
+					"autoWidth": false,
+					"responsive": true,
+				});
+			});
+		</script>
+
+		<script th:inline="javascript">
+			/*[+
+				$(function() {
+					$("#model").load('/ajax/brands', $("#brand").serialize());
+					$('#brand').on('change', function() {
+						$("#model").load('/ajax/brands', $("#brand").serialize());
+					});
+				});
+		+]*/
+		</script>
+		<script>
+			$(document).ready(function () {
+				$('#notificacion').fadeOut(4000); // 5 seconds x 1000 milisec = 5000 milisec
+			});
+		</script>
+
+		<script type="text/javascript">
+			function eliminarCliente(id) {
+				console.log(id);
+				swal({
+					title: "Esta seguro de Eliminar?",
+					text: "Se desactivará el cliente. Los datos se mantendran para historiales!",
+					icon: "warning",
+					buttons: true,
+					dangerMode: true,
+				})
+					.then((OK) => {
+						if (OK) {
+							$.ajax({
+								url: "/eliminar/" + id,
+								success: function (res) {
+									console.log(res);
+								},
+							});
+							swal("Poof! Registro eliminado!", {
+								icon: "success",
+							}).then((ok) => {
+								if (ok) {
+									location.href = "/listar";
+								}
+							});
+						}
+
+
+					});
+			}
+		</script>
+
+		<script type="text/javascript">
+			function reactivarCliente(id) {
+				console.log(id);
+				swal({
+					title: "Esta seguro de Reactivar al Cliente?",
+					text: "Se reactivará el cliente.",
+					icon: "info",
+					buttons: true,
+					dangerMode: false,
+				})
+					.then((OK) => {
+						if (OK) {
+							$.ajax({
+								url: "/reactivar/" + id,
+								success: function (res) {
+									console.log(res);
+								},
+							});
+							swal("Poof! Cliente Reactivado!", {
+								icon: "success",
+							}).then((ok) => {
+								if (ok) {
+									location.href = "/listar";
+								}
+							});
+						}
+
+
+					});
+			}
+		</script>
+
+		<style>
+			ul {
+				list-style: none;
+				margin: 0;
+				padding: 0;
+			}
+
+			@media only screen and (max-width: 800px) {
+
+				/* Force table to not be like tables anymore */
+				#no-more-tables table,
+				#no-more-tables thead,
+				#no-more-tables tbody,
+				#no-more-tables th,
+				#no-more-tables td,
+				#no-more-tables tr {
+					display: block;
+				}
+
+				/* Hide table headers (but not display: none;, for accessibility) */
+				#no-more-tables thead tr {
+					position: absolute;
+					top: -9999px;
+					left: -9999px;
+				}
+
+				#no-more-tables tr {
+					border: 1px solid #ccc;
+				}
+
+				#no-more-tables td {
+					/* Behave  like a "row" */
+					border: none;
+					border-bottom: 1px solid #eee;
+					position: relative;
+					padding-left: 50%;
+					white-space: normal;
+					text-align: left;
+				}
+
+				#no-more-tables td:before {
+					/* Now like a table header */
+					position: absolute;
+					/* Top/left values mimic padding */
+					top: 6px;
+					left: 6px;
+					width: 45%;
+					padding-right: 10px;
+					white-space: nowrap;
+					text-align: left;
+					font-weight: bold;
+				}
+		</style>
+</body>
+
+</html>

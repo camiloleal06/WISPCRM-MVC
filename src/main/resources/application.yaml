@@ -1,0 +1,59 @@
+# Ruta reportes
+invoice:
+  logo:
+    path: /jasper/images/LOGO.png
+  template:
+    path: /jasper/Facturassss.jrxml
+recibo:
+  template:
+    path: /jasper/Recibos.jrxml
+orden:
+  template:
+    path: /jasper/OrdenServicio.jrxml
+spring:
+  thymeleaf:
+    mode: LEGACYHTML5
+    cache: false
+  datasource:
+    url: jdbc:mysql://74.208.118.100/sysred2023?useSSL=false&serverTimezone=UTC&useLegacyDatetimeCode=false
+    username: camiloleal
+    password: C4m1l02020+-+
+    hikari:
+      connection-test-query: "SELECT 1 FROM DUAL"
+      connection-timeout: 600000
+      maximum-pool-size: 500
+      max-lifetime: 1800000
+      minimum-idle: 20
+      validation-timeout: 3000
+      idle-timeout: 60000
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+    hibernate:
+      ddl-auto: update
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: sysredcartagena@gmail.com
+    password: zuusiizspvvzjcgb
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
+            required: true
+          auth: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+factura:
+  path: "${PATH_FACTURAS:/var/www/html/facturas/}"
+message :
+  urlChat: "${URLCHAT}"
+  urlDocument : "${URLDOCUMENT}"
+  uriWhatsappApiSender: "${URI:https://www.wasenderapi.com/api/send-message}"
+  tokenBearerWhatsappApiSender: "${TOKEN_BEARER:Bearer 53d2b099e4caa7a4aac7941bbe0b843918d68ea86ec53127bb676608d38b2a20}"
+  msgToken : "${TOKEN}"
+server:
+  port: ${PORT:8889}

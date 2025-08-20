@@ -1,0 +1,117 @@
+<html xmlns:th="http://thymeleaf.org">
+<head th:replace="layout/layout :: head">
+
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+	<div class="wrapper">
+		<nav th:replace="layout/layout :: menu"></nav>
+		<aside th:replace="layout/layout :: sidebar"></aside>
+		<div class="content-wrapper">
+
+			<!-- Content Header (Page header) -->
+			<div class="content-header">
+				<div class="container-fluid">
+					<div class="row mb-2">
+						<div class="col-sm-6">
+							<h1 class="m-0 text-dark">Facturacion</h1>
+						</div>
+						<!-- /.col -->
+						<div class="col-sm-6">
+							<ol class="breadcrumb float-sm-right">
+								<li class="breadcrumb-item"><a href="#">Inicio</a></li>
+								<li class="breadcrumb-item active"></li>
+							</ol>
+						</div>
+						<!-- /.col -->
+					</div>
+					<!-- /.row -->
+				</div>
+				<!-- /.container-fluid -->
+			</div>
+			<!-- /.content-header -->
+
+			<!-- Main content -->
+			<section class="content">
+				<div class="container-fluid">
+					<div class="row">
+						<!-- left column -->
+						<div class="col-md-12">
+							<!-- general form elements -->
+							<div class="card card-primary">
+								<div class="card-header">
+									<h3 class="card-title" th:text="${titulo}"></h3>
+								</div>
+								<!-- /.card-header -->
+								<!-- form start -->
+								<form th:object="${factura}" th:action="@{/savefactura}"
+									method="post">
+									<div class="form-row col-md-12">
+										<div class="form-group col-md-4">
+											<input type="hidden" th:value="${factura.cliente.id}" />
+											
+											 <label
+												for="identificacion">Numero de Identificacion</label> <input
+												type="text" th:value="${factura.cliente.identificacion}"
+												class="form-control" id="identificacion" readonly="readonly">
+										</div>
+										<div class="form-group col-md-4">
+											<label for="nombres">Nombres</label> <input type="text"
+												readonly="readonly"
+												th:value="${factura.cliente.nombres}+ ' '+${factura.cliente.apellidos} "
+												class="form-control" id="nombres">
+										</div>
+											<div class="form-group col-md-4">
+												<label for="nombres">Correo Electronico</label> <input
+													type="text" readonly="readonly"
+													th:value="${factura.cliente.email} " class="form-control">
+											</div>
+										<div class="form-row col-md-12">
+
+											<div class="form-group col-md-4">
+												<label for="telefono">Telefono</label> <input
+													type="text" readonly="readonly"
+													th:value="${factura.cliente.telefono} " class="form-control">
+											</div>
+
+
+											<div class="form-group col-md-4">
+												<label>Plan de Internet</label> <select class="form-control">
+													<option th:text="${factura.cliente.planes.nombre}"
+														th:value="${factura.cliente.planes.id}" />
+												</select>
+											</div>
+
+<div class="form-group col-md-4">
+												<label for="valor">Valor Factura</label> <input
+													type="number" required="true" 
+													th:value="${factura.cliente.planes.precio} " class="form-control">
+											</div>
+	<input type="hidden" name="isPresent" value="0">
+	<input type="checkbox" name="isPresent" id="isPresent" th:value="1">
+										</div>
+</div>
+
+										<div class="box-footer col-md-12">
+											<button class="btn btn-primary" type="submit">Crear
+												Factura</button>
+										</div>
+								</form>
+							</div>
+							<!-- /.card -->
+						</div>
+					</div>
+				</div>
+			</section>
+		</div>
+		<footer th:replace="layout/layout :: footer"></footer>
+
+		<!-- Control Sidebar -->
+		<aside class="control-sidebar control-sidebar-dark">
+			<!-- Control sidebar content goes here -->
+		</aside>
+		<!-- /.control-sidebar -->
+
+
+	</div>
+</body>
+</html>

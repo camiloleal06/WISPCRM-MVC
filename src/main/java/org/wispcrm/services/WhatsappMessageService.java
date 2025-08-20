@@ -29,6 +29,7 @@ public class WhatsappMessageService {
     public static final String AUTHORIZATION = "Authorization";
     public static final String TYPE = "Content-Type";
     public static final String APPLICATION_JSON = "application/json";
+    public static final String ENVIO_DE_MENSAJE_DE_WHATS_APP = "Envio de mensaje de whatsApp {}";
 
     @Value("${message.urlChat}")
     private String urlChat;
@@ -164,10 +165,10 @@ public class WhatsappMessageService {
     }
 
     private void logResponse(Response response) throws IOException {
-       log.info("Envio de mensaje de whatsApp {}", response.body().string());
+       log.info(ENVIO_DE_MENSAJE_DE_WHATS_APP, response.body().string());
     }
 
     private void logResponse(String response) throws IOException {
-        log.info("Envio de mensaje de whatsApp {}", response);
+        log.info(ENVIO_DE_MENSAJE_DE_WHATS_APP, response);
     }
 }

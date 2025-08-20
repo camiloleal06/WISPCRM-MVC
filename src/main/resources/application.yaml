@@ -50,10 +50,10 @@ spring:
 factura:
   path: "${PATH_FACTURAS:/var/www/html/facturas/}"
 message :
-  urlChat: "${URLCHAT}"
-  urlDocument : "${URLDOCUMENT}"
+  urlChat: "${URLCHAT:https://www.wasenderapi.com/api/send-message}"
+  urlDocument : "${URLDOCUMENT:https://www.wasenderapi.com/api/send-message}"
   uriWhatsappApiSender: "${URI:https://www.wasenderapi.com/api/send-message}"
   tokenBearerWhatsappApiSender: "${TOKEN_BEARER:Bearer 53d2b099e4caa7a4aac7941bbe0b843918d68ea86ec53127bb676608d38b2a20}"
-  msgToken : "${TOKEN}"
+  msgToken : "${TOKEN:hjfsf}"
 server:
   port: ${PORT:8889}

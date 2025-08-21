@@ -94,6 +94,12 @@
 						</div>
 					</div>
 				</div>
+
+
+				<div class="card mb-4">
+					<div class="card-header"><h3 class="card-title">Sales Value</h3></div>
+					<div class="card-body"><div id="revenue-chart"></div></div>
+				</div>
 			</section>
 			
 		</div>
@@ -107,5 +113,78 @@
 	</div>
 
 </body>
+</script>
+<!-- apexcharts -->
+<script
+		src="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.min.js"
+		integrity="sha256-+vh8GkaU7C9/wbSLIcwq82tQ2wTf44aOHA8HlBMwRI8="
+		crossorigin="anonymous"
+></script>
+<!-- ChartJS -->
+<script>
+    const sales_chart_options = {
+      series: [
+        {
+          name: 'Digital Goods',
+          data: [28, 48, 40, 19, 86, 27, 90],
+        },
+        {
+          name: 'Electronics',
+          data: [65, 59, 80, 81, 56, 55, 40],
+        },
+      ],
+      chart: {
+        height: 300,
+        type: 'area',
+        toolbar: {
+          show: false,
+        },
+      },
+      legend: {
+        show: false,
+      },
+      colors: ['#0d6efd', '#20c997'],
+      dataLabels: {
+        enabled: false,
+      },
+      stroke: {
+        curve: 'smooth',
+      },
+      xaxis: {
+        type: 'datetime',
+        categories: [
+          '2025-01-01',
+          '2025-02-01',
+          '2025-03-01',
+          '2025-04-01',
+          '2025-05-01',
+          '2025-06-01',
+          '2025-07-01',
+          '2025-08-01'
+        ],
+      },
+      tooltip: {
+        x: {
+          format: 'MMMM yyyy',
+        },
+      },
+    };
 
+    const sales_chart = new ApexCharts(
+      document.querySelector('#revenue-chart'),
+      sales_chart_options,
+    );
+    sales_chart.render();
+</script>
+<!-- jsvectormap -->
+<script
+		src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/js/jsvectormap.min.js"
+		integrity="sha256-/t1nN2956BT869E6H4V1dnt0X5pAQHPytli+1nTZm2Y="
+		crossorigin="anonymous"
+></script>
+<script
+		src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/maps/world.js"
+		integrity="sha256-XPpPaZlU8S/HWf7FZLAncLg2SAkP8ScUTII89x9D3lY="
+		crossorigin="anonymous"
+></script>
 </html>

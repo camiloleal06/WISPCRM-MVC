@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,7 +33,7 @@ import com.google.firebase.messaging.FirebaseMessagingException;
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/api/clientes")
-
+@Slf4j
 public class ClienteRestController {
 
     @Autowired
@@ -46,6 +47,14 @@ public class ClienteRestController {
 
     @Autowired
     FirebaseMessagingService firebaseService;
+
+
+    @GetMapping("/test-log")
+    public String testLog() {
+        log.info("Prueba de log INFO");
+        log.error("Prueba de log ERROR");
+        return "Log generado!";
+    }
 
     @GetMapping(value = "/paginador")
     public ResponseEntity<Map<String, Object>> obtenerTodos(@RequestParam(defaultValue = "0") int page,

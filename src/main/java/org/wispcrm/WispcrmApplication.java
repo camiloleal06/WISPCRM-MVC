@@ -2,6 +2,7 @@ package org.wispcrm;
 
 import java.io.IOException;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -20,10 +21,13 @@ import java.util.Calendar;
 @SpringBootApplication
 @EnableScheduling
 @EnableAsync
+@Slf4j
 public class WispcrmApplication {
 
     public static void main(String[] args) {
+
        SpringApplication.run(WispcrmApplication.class, args);
+        log.info("Iniciando Aplicacion SYSRED");
     }
 
     @Bean

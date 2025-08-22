@@ -13,8 +13,9 @@ orden:
 spring:
   logging:
     file:
-      path: /var/log/springboot/
-      name: app.log
+      name: /var/log/springboot/app.log
+    level:
+      root: INFO
   thymeleaf:
     mode: LEGACYHTML5
     cache: false

@@ -1,0 +1,37 @@
+<configuration>
+    <appender name="ELASTIC" class="com.internetitem.logback.elasticsearch.ElasticsearchAppender">
+        <url>http://localhost:9200/_bulk</url>
+        <index>springboot-logs</index>
+        <type>_doc</type>
+        <errorLoggerName>es-error</errorLoggerName>
+        <maxRetries>3</maxRetries>
+        <includeCallerData>true</includeCallerData>
+
+        <properties>
+            <property>
+                <name>@timestamp</name>
+                <value>%date{ISO8601}</value>
+            </property>
+            <property>
+                <name>level</name>
+                <value>%level</value>
+            </property>
+            <property>
+                <name>logger</name>
+                <value>%logger</value>
+            </property>
+            <property>
+                <name>thread</name>
+                <value>%thread</value>
+            </property>
+            <property>
+                <name>message</name>
+                <value>%message</value>
+            </property>
+        </properties>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="ELASTIC"/>
+    </root>
+</configuration>

@@ -216,7 +216,7 @@ public class FacturaController {
     @Transactional
     @GetMapping("/pagar/{id}")
     public String pagar(@PathVariable("id") int id, SessionStatus status,
-            RedirectAttributes flash) {
+            RedirectAttributes flash) throws IOException, InterruptedException {
         Factura factura = facturaDao.findFacturabyid(id);
         if (factura == null) {
             flash.addFlashAttribute("error", "Factura no encontrada");
@@ -228,19 +228,13 @@ public class FacturaController {
         pago.setSaldo(0);
         pago.setFactura(factura);
         factura.setEstado(false);
+        String nombres = factura.getCliente().getNombres() + " " + factura.getCliente().getApellidos();
 
         pagosDAO.save(pago);
         Factura facturaSaved = facturaDao.save(factura);
-
-        CompletableFuture.runAsync(() -> {
-            try {
-                sendWhatsAppMessagePagoRecibdo(facturaSaved);
-            } catch (Exception e) {
-                // Importante capturar errores para que no se pierdan silenciosamente
-                log.info("Error enviando WhatsApp: {} " , e.getMessage());
-            }
-        });
-
+        sendWhatsAppMessagePagoRecibdo(facturaSaved);
+        whatsappMessageService.sendSimpleMessageToGroupWasApiSender("120363146011086828@g.us",
+                "Hemos recibido el pago de : " + nombres + " por valor de : " + factura.getValor()+ " pesos cobrado por : "+currentUserName());
         flash.addFlashAttribute(INFO, "Pago agregado correctamente");
         status.setComplete();
         return REDIRECT_LISTARFACTURA;
@@ -485,18 +479,15 @@ public class FacturaController {
 
             int facturaId = factura.getId();
             String telefono = factura.getCliente().getTelefono();
-            String nombres = factura.getCliente().getNombres() + " " + factura.getCliente().getApellidos();
-            String fileName = factura.getId() + PAGADA_PDF;
+             String fileName = factura.getId() + PAGADA_PDF;
             String ruta = ConstantMensaje.RUTA_DESCARGA_FACTURA_DOCS + fileName;
+            String nombres = factura.getCliente().getNombres() + " " + factura.getCliente().getApellidos();
             String mensaje = ESTIMADO_A + nombres + ConstantMensaje.HEMOS_RECIBIDO_SU_PAGO + facturaId;
 
             reporte.pagoPdfReport(facturaId, fileName);
             ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
             excuteSendMsgToWhatsApp(executorService, mensaje, telefono,
                     fileName, ruta);
-            whatsappMessageService.sendSimpleMessageToGroupWasApiSender("120363146011086828@g.us",
-                    "Hemos recibido el pago de : " + nombres + " por valor de : " + factura.getValor()+ " pesos cobrado por : "+currentUserName());
-
         } catch (Exception e) {
             log.error(ERROR, new Exception());
         }

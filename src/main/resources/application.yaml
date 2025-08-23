@@ -36,8 +36,8 @@ spring:
         dialect: org.hibernate.dialect.MySQL5InnoDBDialect
     hibernate:
       ddl-auto: none    # Changed for production safety
-    open-in-view: false # Performance improvement
-    show-sql: false     # Disable SQL logging in production
+    open-in-view: true # Performance improvement
+    show-sql: true     # Disable SQL logging in production
   mail:
     host: smtp.gmail.com
     port: 587

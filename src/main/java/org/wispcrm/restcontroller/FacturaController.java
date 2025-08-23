@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -212,6 +213,7 @@ public class FacturaController {
         return REDIRECT_LISTARFACTURA;
     }
 
+    @Transactional
     @GetMapping("/pagar/{id}")
     public String pagar(@PathVariable("id") int id, SessionStatus status,
             RedirectAttributes flash) {

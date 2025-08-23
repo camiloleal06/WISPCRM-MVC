@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -20,8 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
@@ -197,7 +196,7 @@ public class FacturaController {
     }
 
     @GetMapping("/pagar/{id}")
-    public String pagar(@PathVariable("id") int id, SessionStatus status,
+    public String pagar1(@PathVariable("id") int id, SessionStatus status,
             RedirectAttributes flash) {
         Factura factura = facturaDao.findFacturabyid(id);
         Pago pago = new Pago();
@@ -213,14 +212,46 @@ public class FacturaController {
         return REDIRECT_LISTARFACTURA;
     }
 
+    @GetMapping("/pagar/{id}")
+    public String pagar(@PathVariable("id") int id, SessionStatus status,
+            RedirectAttributes flash) {
+        Factura factura = facturaDao.findFacturabyid(id);
+        if (factura == null) {
+            flash.addFlashAttribute("error", "Factura no encontrada");
+            return REDIRECT_LISTARFACTURA;
+        }
+
+        Pago pago = new Pago();
+        pago.setPago(factura.getValor());
+        pago.setSaldo(0);
+        pago.setFactura(factura);
+        factura.setEstado(false);
+
+        pagosDAO.save(pago);
+        Factura facturaSaved = facturaDao.save(factura);
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                sendWhatsAppMessagePagoRecibdo(facturaSaved);
+            } catch (Exception e) {
+                // Importante capturar errores para que no se pierdan silenciosamente
+                log.info("Error enviando WhatsApp: {} " , e.getMessage());
+            }
+        });
+
+        flash.addFlashAttribute(INFO, "Pago agregado correctamente");
+        status.setComplete();
+        return REDIRECT_LISTARFACTURA;
+    }
+
+
     @GetMapping("/pagarmultiple")
     public String pagarMultiple(
             @RequestParam(name = "present", defaultValue = "0") List<String> values,
             RedirectAttributes flash) {
         List<String> listaFacturas = new ArrayList<>();
         values.forEach(item -> {
-            Factura factura = new Factura();
-            factura = facturaDao.findFacturabyid(Integer.valueOf(item));
+            Factura factura = facturaDao.findFacturabyid(Integer.valueOf(item));
             Pago pago = Pago.builder().pago(factura.getValor()).saldo(0)
                     .factura(factura).build();
             factura.setEstado(false);
@@ -494,7 +525,7 @@ public class FacturaController {
             String telefono, String fileName, String ruta) {
         executorService.schedule(() -> {
             try {
-                log.info("Envio documento : "+ruta);
+                log.info("Envio documento : {}", ruta);
                 whatsappMessageService.sendDocumentAndMessageWasenderapi(telefono, mensaje, ruta);
             } catch (IOException e) {
                 log.error(e.getMessage());

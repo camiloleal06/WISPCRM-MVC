@@ -137,10 +137,10 @@
 												<td><a th:onclick="pagar([[${factura.idFactura}]])"
 														class="btn btn-primary btn-sm" th:text="Pagar"></a>
 														
-														<!--	<a
+												<a th:if="${#authorization.expression('hasRole(''ADMIN'')')}"
 														th:onclick="eliminar([[${factura.idFactura}]])"
-														class="btn btn-danger btn-sm" th:text="Eliminar">
-
+														class="btn btn-danger btn-sm" th:text="Eliminar"></a>
+<!--
 													 <a
 														th:href="@{'eliminarfactura/' + ${factura.idFactura}}"
 														class="btn btn-warning btn-sm" th:text="Eliminar"></a>

@@ -74,11 +74,13 @@
 								<div class="card-header">
 									<h3 class="card-title">Listado de Clientes</h3>
 									<div style="display: flex; justify-content: flex-end">
-										<a th:href="@{/facturar}" th:text="'Facturar'" class="btn btn-primary "></a>
+										<a th:if="${#authorization.expression('hasRole(''ADMIN'')')}"
+										   th:href="@{/facturar}" th:text="'Facturar'" class="btn btn-primary "></a>
 									</div>
 
 									<div style="display: flex; justify-content: flex-end">
-										<a th:href="@{/notificar}" th:text="'Notificar'" class="btn btn-primary "></a>
+										<a th:if="${#authorization.expression('hasRole(''ADMIN'')')}"
+										   th:href="@{/notificar}" th:text="'Notificar'" class="btn btn-primary "></a>
 									</div>
 								</div>
 

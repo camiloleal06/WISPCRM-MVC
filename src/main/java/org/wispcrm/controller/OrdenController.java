@@ -18,10 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.wispcrm.modelo.Cliente;
-import org.wispcrm.modelo.Factura;
 import org.wispcrm.modelo.Orden;
 import org.wispcrm.services.ClienteServiceImpl;
-import org.wispcrm.services.EnviarSMS;
 import org.wispcrm.services.FacturaReportService;
 import org.wispcrm.services.OrdenService;
 import org.wispcrm.services.WhatsappMessageService;
@@ -32,9 +30,6 @@ import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperPrint;
 
-import static org.wispcrm.restcontroller.FacturaController.ERROR;
-import static org.wispcrm.utils.Util.currentUserName;
-
 @Controller
 @AllArgsConstructor
 @Slf4j
@@ -44,8 +39,7 @@ public class OrdenController {
     private final OrdenService ordenService;
     private final ClienteServiceImpl clienteService;
     private final FacturaReportService reporte;
-    private final EnviarSMS enviarSMS;
-    private final WhatsappMessageService whatsappMessageService;
+        private final WhatsappMessageService whatsappMessageService;
 
 
     @RequestMapping(value = "/listarordenes")
@@ -74,7 +68,6 @@ public class OrdenController {
         Orden ordenSaved = this.ordenService.createOrden(orden);
         sendWhatsAppMessageOrdenGenerada(ordenSaved);
         flash.addFlashAttribute("success", " Se Agregado la Orden correctamente").addFlashAttribute("clase", "success");
-
         return REDIRECT_LISTAR_FACTURA;
     }
 
@@ -103,17 +96,6 @@ public class OrdenController {
         }
     }
 
-   /* private void sendWhatsAppMessageOrdenGenerada(Orden orden) {
-        try {
-            whatsappMessageService.sendSimpleMessageToGroupWasApiSender("120363146011086828@g.us",
-                    "Estimado Tecnico, Se ha generado una orden de servicio para el cliente : "
-                            + orden.getCliente().getNombres() + " " + ConstantMensaje.RUTA_DESCARGA_ORDEN_DE_SERVICIO
-                            + orden.getId());
-        } catch (Exception e) {
-            log.error(ERROR, new Exception());
-        }
-    }*/
-
     private void sendWhatsAppMessageOrdenGenerada(Orden orden) {
         if (orden == null || orden.getCliente() == null) {
             log.error("No se puede enviar mensaje: Orden o cliente es null");
@@ -122,20 +104,17 @@ public class OrdenController {
 
         try {
             // Use StringBuilder for better performance with string concatenation
-            StringBuilder messageBuilder = new StringBuilder()
-                    .append("Estimado Tecnico, Se ha generado una orden de servicio para el cliente : ")
-                    .append(orden.getCliente().getNombres())
-                    .append(" ")
+            StringBuilder messageBuilder = new StringBuilder().append(
+                            "Estimado Tecnico, Se ha generado una orden de servicio para el cliente : ")
+                    .append(orden.getCliente().getNombres()).append(" ")
                     .append(ConstantMensaje.RUTA_DESCARGA_ORDEN_DE_SERVICIO)
                     .append(orden.getId());
 
             whatsappMessageService.sendSimpleMessageToGroupWasApiSender(
-                    "120363146011086828@g.us",
-                    messageBuilder.toString()
-            );
-        } catch (Exception e) {
-            // Log the actual exception instead of creating a new one
+                    "120363146011086828@g.us", messageBuilder.toString());
+        } catch (IOException | InterruptedException e) {
             log.error("Error al enviar mensaje de WhatsApp: ", e);
+
         }
     }
 

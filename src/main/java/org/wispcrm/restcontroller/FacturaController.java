@@ -196,7 +196,7 @@ public class FacturaController {
         return LISTAR_FACTURA;
     }
 
-    @GetMapping("/pagar/{id}")
+  /*  @GetMapping("/pagar/{id}")
     public String pagar1(@PathVariable("id") int id, SessionStatus status,
             RedirectAttributes flash) {
         Factura factura = facturaDao.findFacturabyid(id);
@@ -211,7 +211,7 @@ public class FacturaController {
         flash.addFlashAttribute(INFO, "Pago agregado correctamente");
         status.setComplete();
         return REDIRECT_LISTARFACTURA;
-    }
+    }*/
 
     @Transactional
     @GetMapping("/pagar/{id}")

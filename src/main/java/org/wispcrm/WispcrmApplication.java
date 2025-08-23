@@ -27,7 +27,6 @@ public class WispcrmApplication {
     public static void main(String[] args) {
 
        SpringApplication.run(WispcrmApplication.class, args);
-        log.info("Iniciando Aplicacion SYSRED");
     }
 
     @Bean

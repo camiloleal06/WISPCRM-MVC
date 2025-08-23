@@ -1,24 +1,23 @@
-# Ruta reportes
+# Report Templates Configuration
 invoice:
   logo:
-    path: /jasper/images/LOGO.png
+    path: "${INVOICE_LOGO_PATH:/jasper/images/LOGO.png}"
   template:
-    path: /jasper/Facturassss.jrxml
+    path: "${INVOICE_TEMPLATE_PATH:/jasper/Facturas.jrxml}"
 recibo:
   template:
-    path: /jasper/Recibos.jrxml
+    path: "${RECIBO_TEMPLATE_PATH:/jasper/Recibos.jrxml}"
 orden:
   template:
-    path: /jasper/OrdenServicio.jrxml
+    path: "${ORDEN_TEMPLATE_PATH:/jasper/OrdenServicio.jrxml}"
 spring:
-  logging:
-      file:
-        name: /var/log/springboot/app.log
-      level:
-        root: INFO
+  # Thymeleaf Configuration
   thymeleaf:
-    mode: LEGACYHTML5
-    cache: false
+    mode: HTML
+    cache: true
+    encoding: UTF-8
+    servlet:
+      content-type: text/html
   datasource:
     url: jdbc:mysql://74.208.118.100/sysred2023?useSSL=false&serverTimezone=UTC&useLegacyDatetimeCode=false
     username: camiloleal
@@ -36,7 +35,9 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL5InnoDBDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: none    # Changed for production safety
+    open-in-view: false # Performance improvement
+    show-sql: false     # Disable SQL logging in production
   mail:
     host: smtp.gmail.com
     port: 587

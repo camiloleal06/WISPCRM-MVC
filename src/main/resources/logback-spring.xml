@@ -1,28 +1,34 @@
 <configuration>
-    <!-- File Appender -->
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/app.log</file>
+
+    <!-- Rolling File Appender en JSON -->
+    <appender name="FILE_JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>/var/log/springboot/app.json</file>
+
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>logs/archived/sysred.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- Archivos rotados por fecha y tamaño -->
+            <fileNamePattern>/var/log/springboot/archived/sysred.%d{yyyy-MM-dd}.%i.json</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
             <maxHistory>30</maxHistory>
             <totalSizeCap>3GB</totalSizeCap>
         </rollingPolicy>
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+
+        <!-- Encoder JSON -->
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <timeZone>UTC</timeZone>
         </encoder>
     </appender>
 
-    <!-- Console Appender -->
+    <!-- Console Appender en texto normal (opcional) -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <!-- Root Logger -->
+    <!-- Root logger -->
     <root level="INFO">
-        <appender-ref ref="FILE" />
+        <appender-ref ref="FILE_JSON" />
         <appender-ref ref="CONSOLE" />
     </root>
+
 </configuration>

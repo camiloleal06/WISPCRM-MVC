@@ -10,6 +10,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: VPS_SSH_KEY
 
     steps:
       # 1️⃣ Recuperar código
@@ -31,23 +32,23 @@ jobs:
       - name: Compilando y empaquetando el proyecto
         run: ./mvnw clean package -DskipTests
 
-      # 5️⃣ Copiar JAR al VPS (con usuario + contraseña)
+      # 5️⃣ Copiar JAR al VPS
       - name: Copiando archivos jar al Servidor VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
-          password: ${{ secrets.VPS_PASSWORD }}
+          key: ${{ secrets.VPS_SSH_KEY }}
           source: "target/*.jar"
           target: "~/wispcrm/"
 
-      # 6️⃣ Reiniciar servicio en VPS (con usuario + contraseña)
+      # 6️⃣ Reiniciar servicio en VPS
       - name: Reiniciando Servicio
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
-          password: ${{ secrets.VPS_PASSWORD }}
+          key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             sudo systemctl stop sysred || true
             sudo systemctl daemon-reload

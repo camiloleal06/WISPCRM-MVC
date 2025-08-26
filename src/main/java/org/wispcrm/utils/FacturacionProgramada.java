@@ -1,74 +1,90 @@
 package org.wispcrm.utils;
 
-import java.io.File;
-import java.util.Calendar;
-import java.util.Date;
+import java.io.IOException;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.wispcrm.daos.InterfaceFacturas;
-import org.wispcrm.interfaces.ClienteInterface;
-import org.wispcrm.modelo.Cliente;
-import org.wispcrm.modelo.Factura;
-import org.wispcrm.services.ClienteServiceImpl;
-import org.wispcrm.services.FacturaReportService;
-import org.wispcrm.services.MailService;
+import org.wispcrm.modelo.FacturaDto;
+import org.wispcrm.services.WhatsappMessageService;
 
-import net.sf.jasperreports.engine.JRException;
-
+@Slf4j
 @Component
-
+@RequiredArgsConstructor
 public class FacturacionProgramada {
 
-    @Autowired
-    ClienteInterface clienteDao;
-    @Autowired
-    ClienteServiceImpl datacliente;
-    @Autowired
-    FacturaReportService reporte;
-    @Autowired
-    MailService mailService;
-    @Autowired
-    InterfaceFacturas facturaDao;
+    private static final int DIAS_MORA_MINIMO = 4;
+    private static final int DIAS_MORA_MAXIMO = 30;
+    private final InterfaceFacturas facturaDao;
+    private final WhatsappMessageService whatsappMessageService;
 
+    @Scheduled(cron = "0 0 9 * * MON-SAT") // Ejecuta a las 8:00 AM de lunes a sábado
     public void scheduleTaskWithFixedRate() {
-
-   /*     Calendar fechaactual = Calendar.getInstance();
-        int diaactual = fechaactual.get(Calendar.DAY_OF_MONTH);
-        Calendar fechavencimiento = Calendar.getInstance();
-
-        fechavencimiento.setTime(new Date());
-        fechavencimiento.add(Calendar.DAY_OF_YEAR, 10);
-
-        List<Cliente> clientes = clienteDao.findAll();
-        Cliente cl = new Cliente();
-
-        for (Cliente cliente : clientes) {
-            Factura factura = new Factura();
-            cl.setId(cliente.getId());
-            cl.setEmail(cliente.getEmail());
-            cl.setIdentificacion(cliente.getIdentificacion());
-            cl.setPlanes(cliente.getPlanes());
-            factura.setFechapago(new Date());
-            factura.setFechavencimiento(fechavencimiento.getTime());
-            factura.setCliente(cl);
-            if (diaactual == cliente.getDiapago()
-                    && facturaDao.findFirstFacturaByCliente(factura.getCliente()) == null) {
-                datacliente.saveFactura(factura);
-                String client = factura.getCliente().getIdentificacion();
-                try {
-                    reporte.createPdfReport(factura.getId(), client + ".pdf");
-                    mailService.sendEmailAttachment("Llegó tu factura!!",
-                            "Estimado(a) Cliente  se ha generado una factura a su nombre Gracias por su Preferencia",
-                            "administracion@nacionaldemuebles.com.co", factura.getCliente().getEmail(), true,
-                            new File(client + ".pdf"));
-                } catch (JRException e) {
-                    e.printStackTrace();
-                }
-            }
-
+        if (!debeEjecutarHoy()) {
+            log.info("Hoy no corresponde enviar mensajes");
+            return;
         }
-    }*/
+
+        try {
+            log.info("Iniciando envío de mensajes programados");
+            List<FacturaDto> facturas = facturaDao.listadoFacturasPendientes();
+            facturas.stream()
+                    .filter(this::tieneMoreRelevante)
+                    .forEach(this::enviarMensaje);
+            log.info("Finalizado envío de mensajes programados");
+        } catch (Exception e) {
+            log.error("Error al procesar envío de mensajes programados", e);
+        }
+    }
+
+    private boolean debeEjecutarHoy() {
+        LocalDate hoy = LocalDate.now();
+        DayOfWeek diaSemana = hoy.getDayOfWeek();
+        if (diaSemana == DayOfWeek.SUNDAY) {
+            return false;
+        }
+        return hoy.getDayOfMonth() % 2 == 0;
+    }
+
+    private boolean tieneMoreRelevante(FacturaDto factura) {
+        if (factura == null) {
+            log.warn("Se recibió una factura nula");
+            return false;
+        }
+        return factura.getMora() > DIAS_MORA_MINIMO && factura.getMora() < DIAS_MORA_MAXIMO;
+    }
+
+    private void enviarMensaje(FacturaDto factura) {
+        try {
+            String mensaje = construirMensaje(factura);
+            whatsappMessageService.sendSimpleMessageWasenderapi(
+                    factura.getTelefonoCliente(),
+                    mensaje
+            );
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("Operación interrumpida", e);
+        } catch (IOException e) {
+            log.error("Error de IO al enviar mensaje para factura {}: {}",
+                    factura.getIdFactura(), e.getMessage());
+        }
+    }
+
+
+    private String construirMensaje(FacturaDto factura) {
+        return String.format(
+                "Estimado(a) %s:%n" +
+                        "Su factura #%s tiene una mora de %d días.%n" +
+                        "Por favor hacer el pago correspondiente. " +
+                        "Si ya realizó el pago, comuníquese con nosotros o haga caso omiso.%n" +
+                        "Gracias por su preferencia.",
+                factura.getNombres(),
+                factura.getIdFactura(),
+                factura.getMora()
+        );
     }
 }

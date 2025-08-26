@@ -1,4 +1,4 @@
-name: Desplegar a VPS - Ionos
+name: Desplegar a VPS - Ionos Server
 
 on:
   push:

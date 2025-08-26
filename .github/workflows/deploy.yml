@@ -34,7 +34,7 @@ jobs:
 
       # 5️⃣ Copiar JAR al VPS (con usuario + contraseña)
       - name: Copiando archivos jar al Servidor VPS
-        uses: appleboy/scp-action@v0.1.8
+        uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}

@@ -11,6 +11,11 @@ orden:
   template:
     path: "${ORDEN_TEMPLATE_PATH:/jasper/OrdenServicio.jrxml}"
 spring:
+  logging:
+      file:
+        name: ./sysred.log
+      level:
+        root: INFO
   # Thymeleaf Configuration
   thymeleaf:
     mode: HTML

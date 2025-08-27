@@ -14,7 +14,7 @@
 
         <!-- Encoder JSON -->
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <timeZone>UTC</timeZone>
+            <timeZone>America/Bogota</timeZone>
         </encoder>
     </appender>
 

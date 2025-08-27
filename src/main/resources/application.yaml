@@ -68,3 +68,6 @@ message :
   msgToken : "${TOKEN:hjfsf}"
 server:
   port: ${PORT:8889}
+sysred :
+  notification :
+    cron : "${CRON_SCHEDULED:0 0 9 * * 2,6}"

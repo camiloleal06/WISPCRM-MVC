@@ -22,8 +22,7 @@ public class FacturacionProgramada {
     private final InterfaceFacturas facturaDao;
     private final WhatsappMessageService whatsappMessageService;
 
-  //  @Scheduled(cron = "0 0 9 * * MON-SAT") // Ejecuta a las 8:00 AM de lunes a sábado
-    @Scheduled(cron = "0 0 9 * * 2,6")
+    @Scheduled(cron = "${sysred.notification.cron}")
     public void scheduledPaymentNotification() {
         if (!debeEjecutarHoy()) {
             log.info("Hoy no corresponde enviar mensajes");

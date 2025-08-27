@@ -1,8 +1,6 @@
 <configuration>
 
-    <!-- ===========================
-         Rolling File Appender en JSON
-         =========================== -->
+    <!-- Rolling File Appender en JSON -->
     <appender name="FILE_JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>/var/log/springboot/app.json</file>
 
@@ -20,40 +18,16 @@
         </encoder>
     </appender>
 
-    <!-- ===========================
-         Elasticsearch Appender
-         =========================== -->
-    <appender name="ELASTIC" class="com.internetitem.logback.elasticsearch.ElasticsearchAppender">
-        <url>http://localhost:9200</url>
-        <index>springboot-logs</index>
-
-        <!-- Encoder compatible JSON -->
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
-
-        <!-- Nivel mínimo de logs -->
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>INFO</level>
-        </filter>
-
-        <!-- Reconexión automática -->
-        <reconnectDelayMillis>5000</reconnectDelayMillis>
-    </appender>
-
-    <!-- ===========================
-         Console Appender en texto
-         =========================== -->
+    <!-- Console Appender en texto normal (opcional) -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <!-- ===========================
-         Root Logger
-         =========================== -->
+    <!-- Root logger -->
     <root level="INFO">
         <appender-ref ref="FILE_JSON" />
-        <appender-ref ref="ELASTIC" />
         <appender-ref ref="CONSOLE" />
     </root>
 

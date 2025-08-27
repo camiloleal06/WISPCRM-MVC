@@ -18,6 +18,24 @@
         </encoder>
     </appender>
 
+    <!-- Elasticsearch Appender -->
+    <appender name="ELASTIC" class="com.internetitem.logback.elasticsearch.ElasticsearchAppender">
+        <!-- URL de Elasticsearch -->
+        <url>http://localhost:9200</url>
+
+        <!-- Nombre del índice -->
+        <index>springboot-logs</index>
+
+        <!-- Layout JSON -->
+        <layout class="net.logstash.logback.layout.LogstashLayout"/>
+
+        <!-- Nivel mínimo de logs -->
+        <threshold>INFO</threshold>
+
+        <!-- Reconexión automática -->
+        <reconnectDelay>5000</reconnectDelay>
+    </appender>
+
     <!-- Console Appender en texto normal (opcional) -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -28,6 +46,7 @@
     <!-- Root logger -->
     <root level="INFO">
         <appender-ref ref="FILE_JSON" />
+        <appender-ref ref="ELASTIC" />
         <appender-ref ref="CONSOLE" />
     </root>
 

@@ -21,7 +21,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/build/", "/dist/**", "/plugins/**", "/docs/**")
+                .antMatchers("/build/", "/dist/**", "/plugins/**", "/docs/**","/css/**")
                 .permitAll().antMatchers("/descargarfactura/**")
                 .permitAll()
                 .antMatchers("/descargarorden/**").permitAll()
@@ -36,8 +36,15 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/factura/**").hasAnyRole(ADMIN)
                 .antMatchers("/vercliente").hasAnyRole(ADMIN)
                 .anyRequest()
-                .authenticated().and().formLogin()
-                .successHandler(successHandler).permitAll().and().logout()
+                .authenticated().and()
+                .formLogin()
+                .loginPage("/login") // URL de tu login personalizado
+                .loginProcessingUrl("/login") // URL donde se envían los datos del formulario
+                .successHandler(successHandler) // tu handler de login exitoso
+                .failureUrl("/login?error=true") // URL en caso de error
+                .permitAll()
+                .successHandler(successHandler)
+                .permitAll().and().logout()
                 .permitAll().and().exceptionHandling()
                 .accessDeniedPage("/error_403");
 

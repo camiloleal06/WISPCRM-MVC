@@ -5,6 +5,7 @@ import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.task.TaskExecutor;
@@ -22,6 +23,7 @@ import java.util.Calendar;
 @EnableScheduling
 @EnableAsync
 @Slf4j
+@EnableCaching
 public class WispcrmApplication {
 
     public static void main(String[] args) {

@@ -32,7 +32,6 @@ public class LoginController {
 			model.addAttribute("success", "Ha cerrado sesión con éxito!");
 		}
 
-		log.info("successLogin", "Inicio de Sesion correcto");
-		return "login";
+  	return "login";
 	}
 }

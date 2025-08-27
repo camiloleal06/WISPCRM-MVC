@@ -15,6 +15,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import lombok.Builder;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import lombok.AllArgsConstructor;
@@ -30,6 +31,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Builder
 public class Cliente implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -47,7 +49,6 @@ public class Cliente implements Serializable {
     private EstadoCliente estado = EstadoCliente.ACTIVO;
     @Column(name = "create_at")
     @Temporal(TemporalType.DATE)
-
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date createAt;
 

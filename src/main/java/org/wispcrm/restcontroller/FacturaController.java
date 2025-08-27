@@ -88,6 +88,10 @@ public class FacturaController {
     private static final String LISTAR_PAGO = "factura/listaPago";
     private static final String REDIRECT_LISTAR = "redirect:/listar";
 
+    private static final String WHATSAPP_GROUP_ID = "120363146011086828@g.us";
+    private static final String PAYMENT_MESSAGE_TEMPLATE = "Hemos recibido el pago de : %s por valor de : %s pesos cobrado por : %s";
+
+
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(
             FacturaController.class);
 
@@ -196,23 +200,6 @@ public class FacturaController {
         return LISTAR_FACTURA;
     }
 
-  /*  @GetMapping("/pagar/{id}")
-    public String pagar1(@PathVariable("id") int id, SessionStatus status,
-            RedirectAttributes flash) {
-        Factura factura = facturaDao.findFacturabyid(id);
-        Pago pago = new Pago();
-        pago.setPago(factura.getValor());
-        pago.setSaldo(0);
-        pago.setFactura(factura);
-        factura.setEstado(false);
-        pagosDAO.save(pago);
-        Factura facturaSaved = facturaDao.save(factura);
-        sendWhatsAppMessagePagoRecibdo(facturaSaved);
-        flash.addFlashAttribute(INFO, "Pago agregado correctamente");
-        status.setComplete();
-        return REDIRECT_LISTARFACTURA;
-    }*/
-
     @Transactional
     @GetMapping("/pagar/{id}")
     public String pagar(@PathVariable("id") int id, SessionStatus status,
@@ -223,19 +210,27 @@ public class FacturaController {
             return REDIRECT_LISTARFACTURA;
         }
 
-        Pago pago = new Pago();
-        pago.setPago(factura.getValor());
-        pago.setSaldo(0);
-        pago.setFactura(factura);
+        Pago pago = Pago.builder()
+                .pago(factura.getValor())
+                .saldo(0)
+                .factura(factura)
+                .build();
+
         factura.setEstado(false);
         String nombres = factura.getCliente().getNombres() + " " + factura.getCliente().getApellidos();
 
         pagosDAO.save(pago);
         Factura facturaSaved = facturaDao.save(factura);
         sendWhatsAppMessagePagoRecibdo(facturaSaved);
-        whatsappMessageService.sendSimpleMessageToGroupWasApiSender("120363146011086828@g.us",
-                "Hemos recibido el pago de : " + nombres + " por valor de : " + factura.getValor()+ " pesos cobrado por : "+currentUserName());
-        flash.addFlashAttribute(INFO, "Pago agregado correctamente");
+
+        whatsappMessageService.sendSimpleMessageToGroupWasApiSender(
+                WHATSAPP_GROUP_ID,
+                String.format(PAYMENT_MESSAGE_TEMPLATE, nombres,
+                        factura.getValor(), currentUserName()));
+
+       flash.addFlashAttribute(INFO, "Pago agregado correctamente");
+
+        log.info("Pago agregado correctamente - ID: {}, Monto: {}", pago.getId(), pago.getPago());
         status.setComplete();
         return REDIRECT_LISTARFACTURA;
     }

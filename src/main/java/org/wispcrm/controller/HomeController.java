@@ -1,8 +1,7 @@
 package org.wispcrm.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +13,7 @@ import org.wispcrm.utils.Util;
 import static org.wispcrm.utils.Util.currentUserName;
 
 @Controller
+@Slf4j
 public class HomeController {
     @Autowired
     private InterfaceFacturas facturaDao;
@@ -34,7 +34,7 @@ public class HomeController {
                 Util.formatearMoneda(facturaDao.totalFacturasPendientesHistorico()));
         modelo.addAttribute("cantidadfacturaspendienteshistorico", facturaDao.totalCantidadFacturasHistorico());
         modelo.addAttribute("totalpagadashistorico", Util.formatearMoneda(facturaDao.totalFacturasPagadasHistorico()));
-        System.out.println("EL USUARIO LOGUEADO ES : "+currentUserName());
+        log.info("usuario logueado {}", currentUserName());
         return "home";
     }
   }

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -42,9 +43,7 @@ public class ClienteController {
     private static final String CLIENTE = "cliente";
     private static final String VER_LISTA_CLIENTE = "cliente/listaCliente";
     private static final String VER_FORM_CLIENTE = "cliente/formCliente";
-
     private final PlanServiceImpl planService;
-    private final EnviarSMS smsService;
     private final ClienteServiceImpl clienteService;
     private final ClienteDao clienteRepository;
     private final InterfaceFacturas daoFacturas;
@@ -75,25 +74,36 @@ public class ClienteController {
         return VER_FORM_CLIENTE;
     }
 
-    @PostMapping(value = "/save")
-    public String save(@ModelAttribute @Validated Cliente cliente, Model modelo,
-            RedirectAttributes flash, BindingResult result,
+    @PostMapping("/save")
+    public String save(@ModelAttribute @Validated Cliente cliente,
+            BindingResult result,
+            Model model,
+            RedirectAttributes redirectAttributes,
             SessionStatus status) {
-        modelo.addAttribute(TITULO, "Nuevo Cliente");
-        clienteService.save(cliente);
-        logClienteOperation("crearCliente", SUCCESS,"Se ha creado un nuevo cliente {}", cliente);
-        status.setComplete();
-        flash.addFlashAttribute(SUCCESS,
-                        cliente.getNombres() + " Agregado correctamente")
-                .addFlashAttribute(CLASE, SUCCESS);
+
+        try {
+            clienteService.save(cliente);
+            logClienteOperation("crearCliente", SUCCESS, "Se ha creado un nuevo cliente {}", cliente);
+            status.setComplete();
+            redirectAttributes.addFlashAttribute(SUCCESS, cliente.getNombres() + " Agregado correctamente")
+                    .addFlashAttribute(CLASE, SUCCESS);
+
+        }
+        catch (DataIntegrityViolationException e) {
+             logClienteOperation("crearCliente", "ERROR",
+                    "Error de integridad de datos al crear cliente: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "El cliente ya existe o hay datos duplicados")
+                    .addFlashAttribute(CLASE, "danger");
+        }
+        catch (Exception e) {
+           logClienteOperation("crearCliente", "ERROR", "Error al crear cliente: {}", e.getMessage());
+           redirectAttributes.addFlashAttribute("error", "Error al guardar el cliente")
+                    .addFlashAttribute(CLASE, "danger");
+
+        }
         return REDIRECT_LISTAR;
     }
 
-    /**
-     * @param id
-     * @param modelo
-     * @return
-     */
     @RequestMapping(value = "/editar")
     public String editar(@RequestParam(name = "id") Integer id, Model modelo) {
         Cliente cliente = clienteService.findById(id);
@@ -102,7 +112,7 @@ public class ClienteController {
             logClienteOperation("editarCliente", "Fail", "No se encontró el cliente con id {}", null);
             return REDIRECT_LISTAR;
         }
-        modelo.addAttribute("listaplan", planService.listPlanes());
+        modelo.addAttribute("listaplan", planService.findAll());
         modelo.addAttribute(TITULO, "Actualizar Cliente");
         return VER_FORM_CLIENTE;
     }
@@ -117,7 +127,6 @@ public class ClienteController {
         return REDIRECT_LISTAR;
     }
 
-
     @GetMapping("/reactivar/{id}")
     public String reactivar(@PathVariable int id) {
         Cliente cliente = clienteService.findById(id);
@@ -127,16 +136,14 @@ public class ClienteController {
         return REDIRECT_LISTAR;
     }
 
-    private void logClienteOperation(String operationValue,String result, String msg, Cliente cliente) {
+    private void logClienteOperation(String operationValue,String result, String msg, Object object) {
         try {
             MDC.put("operation", operationValue);
             MDC.put("response", result);
-            log.info(msg, cliente != null ? cliente : "null");
+            log.info(msg, object != null ? object : "null");
         } finally {
             MDC.remove("operation");
             MDC.remove("response");
-
         }
     }
-
 }

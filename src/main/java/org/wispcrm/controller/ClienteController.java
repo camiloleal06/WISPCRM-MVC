@@ -143,8 +143,7 @@ public class ClienteController {
     }
 
     @GetMapping("/eliminar/{id}")
-    public String eliminar(@PathVariable int id)
-            throws InterruptedException {
+    public String eliminar(@PathVariable int id) {
         Cliente cliente = clienteService.findById(id);
         cliente.setEstado(EstadoCliente.INACTIVO);
         clienteRepository.save(cliente);

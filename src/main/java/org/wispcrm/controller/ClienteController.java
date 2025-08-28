@@ -6,10 +6,11 @@ import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -25,12 +26,12 @@ import org.wispcrm.daos.ClienteDao;
 import org.wispcrm.daos.InterfaceFacturas;
 import org.wispcrm.modelo.Cliente;
 import org.wispcrm.modelo.ClienteDTO;
-import org.wispcrm.modelo.EditarClienteDTO;
 import org.wispcrm.modelo.EstadoCliente;
 import org.wispcrm.services.ClienteServiceImpl;
-import org.wispcrm.services.EnviarSMS;
 import org.wispcrm.services.PlanServiceImpl;
 import org.wispcrm.services.WhatsappMessageService;
+
+import static org.wispcrm.utils.Util.logClienteOperation;
 
 @Controller
 @RequiredArgsConstructor
@@ -43,11 +44,14 @@ public class ClienteController {
     private static final String CLIENTE = "cliente";
     private static final String VER_LISTA_CLIENTE = "cliente/listaCliente";
     private static final String VER_FORM_CLIENTE = "cliente/formCliente";
+    public static final String CREAR_CLIENTE = "crearCliente";
+    public static final String ERROR = "error";
     private final PlanServiceImpl planService;
     private final ClienteServiceImpl clienteService;
     private final ClienteDao clienteRepository;
     private final InterfaceFacturas daoFacturas;
     private  final WhatsappMessageService whatsappMessageService;
+    private final CacheManager cacheManager;
 
     @GetMapping(value = "/vercliente")
     public String ver(@RequestParam(name = "id") Integer id,
@@ -58,13 +62,34 @@ public class ClienteController {
         return "cliente/ver";
     }
 
-    @Cacheable("users")
+
     @GetMapping("/listar")
     public String listarClientes(Model modelo) {
-        List<ClienteDTO> cliente = clienteRepository.lista();
-        modelo.addAttribute(CLIENTE, cliente);
-        return VER_LISTA_CLIENTE;
+        try {
+            List<ClienteDTO> clientes = clienteRepository.lista();
+
+             if (clientes == null) {
+                log.warn("La consulta de clientes retornó null");
+                modelo.addAttribute("mensaje", "Error al obtener los clientes");
+                return ERROR;
+            }
+
+            if (clientes.isEmpty()) {
+                log.warn("No se encontraron clientes en la base de datos");
+                modelo.addAttribute("mensaje", "No hay clientes registrados");
+            }
+
+            modelo.addAttribute(CLIENTE, clientes);
+            return VER_LISTA_CLIENTE;
+
+        } catch (Exception e) {
+            log.error("Error al listar clientes: ", e);
+            modelo.addAttribute(ERROR, "Ocurrió un error al cargar la lista de clientes");
+            return ERROR;
+        }
     }
+
+
 
     @GetMapping("/form")
     public String crear(Model modelo) {
@@ -83,21 +108,21 @@ public class ClienteController {
 
         try {
             clienteService.save(cliente);
-            logClienteOperation("crearCliente", SUCCESS, "Se ha creado un nuevo cliente {}", cliente);
+            logClienteOperation(CREAR_CLIENTE, SUCCESS, "Se ha creado un nuevo cliente {}", cliente);
             status.setComplete();
             redirectAttributes.addFlashAttribute(SUCCESS, cliente.getNombres() + " Agregado correctamente")
                     .addFlashAttribute(CLASE, SUCCESS);
 
         }
         catch (DataIntegrityViolationException e) {
-             logClienteOperation("crearCliente", "ERROR",
+             logClienteOperation(CREAR_CLIENTE, "ERROR",
                     "Error de integridad de datos al crear cliente: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("error", "El cliente ya existe o hay datos duplicados")
+            redirectAttributes.addFlashAttribute(ERROR, "El cliente ya existe o hay datos duplicados")
                     .addFlashAttribute(CLASE, "danger");
         }
         catch (Exception e) {
-           logClienteOperation("crearCliente", "ERROR", "Error al crear cliente: {}", e.getMessage());
-           redirectAttributes.addFlashAttribute("error", "Error al guardar el cliente")
+           logClienteOperation(CREAR_CLIENTE, "ERROR", "Error al crear cliente: {}", e.getMessage());
+           redirectAttributes.addFlashAttribute(ERROR, "Error al guardar el cliente")
                     .addFlashAttribute(CLASE, "danger");
 
         }
@@ -119,31 +144,44 @@ public class ClienteController {
 
     @GetMapping("/eliminar/{id}")
     public String eliminar(@PathVariable int id)
-            throws IOException, InterruptedException {
+            throws InterruptedException {
         Cliente cliente = clienteService.findById(id);
         cliente.setEstado(EstadoCliente.INACTIVO);
         clienteRepository.save(cliente);
         logClienteOperation("eliminarCliente", SUCCESS,"Se ha eliminado el cliente {}",cliente);
+        cacheManager.getCache("clientes").clear();
+
         return REDIRECT_LISTAR;
     }
 
     @GetMapping("/reactivar/{id}")
-    public String reactivar(@PathVariable int id) {
-        Cliente cliente = clienteService.findById(id);
-        cliente.setEstado(EstadoCliente.ACTIVO);
-        clienteRepository.save(cliente);
-        logClienteOperation("reactivarCliente", SUCCESS,"Se ha reactivado el cliente {}",cliente);
-        return REDIRECT_LISTAR;
-    }
-
-    private void logClienteOperation(String operationValue,String result, String msg, Object object) {
+    @Transactional
+    public String reactivar(@PathVariable int id, RedirectAttributes redirectAttributes) {
         try {
-            MDC.put("operation", operationValue);
-            MDC.put("response", result);
-            log.info(msg, object != null ? object : "null");
-        } finally {
-            MDC.remove("operation");
-            MDC.remove("response");
+            Cliente cliente = clienteService.findById(id);
+
+            if (cliente == null) {
+                log.error("No se encontró el cliente con ID: {}", id);
+                redirectAttributes.addFlashAttribute(ERROR, "Cliente no encontrado");
+                return REDIRECT_LISTAR;
+            }
+
+            cliente.setEstado(EstadoCliente.ACTIVO);
+            clienteRepository.save(cliente);
+            logClienteOperation("reactivarCliente", SUCCESS,
+                    "Se ha reactivado el cliente {} ",cliente);
+            redirectAttributes.addFlashAttribute(SUCCESS,
+                    String.format("Cliente %s reactivado exitosamente", cliente.getNombres()));
+            return REDIRECT_LISTAR;
+
+        } catch (Exception e) {
+            log.error("Error al reactivar el cliente {}: {}", id, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute(ERROR,
+                    "Ocurrió un error al reactivar el cliente");
+            return REDIRECT_LISTAR;
+        }
+        finally {
+            cacheManager.getCache("clientes").clear();
         }
     }
 }

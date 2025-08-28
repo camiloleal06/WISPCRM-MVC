@@ -3,6 +3,7 @@ package org.wispcrm.daos;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,6 +28,7 @@ public interface ClienteDao extends JpaRepository<Cliente, Integer> {
 
     List<Cliente> findByDiapagoBetween(int diaInicial, int diaFinal);
 
+    @Cacheable(value = "clientes")
     @Query("SELECT new org.wispcrm.modelo.ClienteDTO" + "(c.id, c.identificacion, CONCAT(c.nombres,' ',c.apellidos), "
             + "c.email, c.telefono,  p.precio, c.estado) " + " FROM Cliente c JOIN c.planes p")
     List<ClienteDTO> lista();
@@ -38,5 +40,8 @@ public interface ClienteDao extends JpaRepository<Cliente, Integer> {
     @Query("SELECT new org.wispcrm.modelo.ClienteDTO(c.id, c.identificacion, CONCAT(c.nombres,' ',c.apellidos), "
             + "c.email , c.telefono, p.precio, c.estado) " + " FROM Cliente c JOIN c.planes p ")
     Page<ClienteDTO> listaPaginada(Pageable pageable);
+
+    @Query("SELECT c FROM Cliente c JOIN FETCH c.planes")
+    List<Cliente> findAllWithPlan();
 
 }

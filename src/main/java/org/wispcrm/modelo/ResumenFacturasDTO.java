@@ -1,21 +1,13 @@
 package org.wispcrm.modelo;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
+@AllArgsConstructor
 public class ResumenFacturasDTO {
-    private Long cantidadFacturas;
-    private Double totalValor;
-
-    public ResumenFacturasDTO(Long cantidadFacturas, Double totalValor) {
-        this.cantidadFacturas = cantidadFacturas;
-        this.totalValor = totalValor;
-    }
-
-    // Getters y setters
-    public Long getCantidadFacturas() {
-        return cantidadFacturas;
-    }
-
-    public Double getTotalValor() {
-        return totalValor;
-    }
+    private final Long cantidadFacturas;
+    private final Double totalValor;
 }

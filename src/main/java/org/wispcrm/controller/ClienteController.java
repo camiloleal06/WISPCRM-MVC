@@ -1,18 +1,16 @@
 package org.wispcrm.controller;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -29,7 +27,6 @@ import org.wispcrm.modelo.ClienteDTO;
 import org.wispcrm.modelo.EstadoCliente;
 import org.wispcrm.services.ClienteServiceImpl;
 import org.wispcrm.services.PlanServiceImpl;
-import org.wispcrm.services.WhatsappMessageService;
 
 import static org.wispcrm.utils.Util.logClienteOperation;
 
@@ -50,7 +47,6 @@ public class ClienteController {
     private final ClienteServiceImpl clienteService;
     private final ClienteDao clienteRepository;
     private final InterfaceFacturas daoFacturas;
-    private  final WhatsappMessageService whatsappMessageService;
     private final CacheManager cacheManager;
 
     @GetMapping(value = "/vercliente")
@@ -100,11 +96,7 @@ public class ClienteController {
     }
 
     @PostMapping("/save")
-    public String save(@ModelAttribute @Validated Cliente cliente,
-            BindingResult result,
-            Model model,
-            RedirectAttributes redirectAttributes,
-            SessionStatus status) {
+    public String save(@ModelAttribute @Validated Cliente cliente, RedirectAttributes redirectAttributes, SessionStatus status) {
 
         try {
             clienteService.save(cliente);
@@ -112,7 +104,6 @@ public class ClienteController {
             status.setComplete();
             redirectAttributes.addFlashAttribute(SUCCESS, cliente.getNombres() + " Agregado correctamente")
                     .addFlashAttribute(CLASE, SUCCESS);
-
         }
         catch (DataIntegrityViolationException e) {
              logClienteOperation(CREAR_CLIENTE, "ERROR",
@@ -148,8 +139,7 @@ public class ClienteController {
         cliente.setEstado(EstadoCliente.INACTIVO);
         clienteRepository.save(cliente);
         logClienteOperation("eliminarCliente", SUCCESS,"Se ha eliminado el cliente {}",cliente);
-        cacheManager.getCache("lista-clientes").clear();
-
+        Objects.requireNonNull(cacheManager.getCache("lista-clientes")).clear();
         return REDIRECT_LISTAR;
     }
 
@@ -180,7 +170,7 @@ public class ClienteController {
             return REDIRECT_LISTAR;
         }
         finally {
-            cacheManager.getCache("lista-clientes").clear();
+            Objects.requireNonNull(cacheManager.getCache("lista-clientes")).clear();
         }
     }
 }

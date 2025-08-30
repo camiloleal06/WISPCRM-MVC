@@ -17,35 +17,31 @@ public interface InterfaceFacturas extends CrudRepository<Factura, Integer> {
 
     List<Factura> findByCliente(Cliente cliente);
 
-    List<Factura> findFacturaByEstado(boolean f);
-
-    List<FacturaDto> findFacturaDtoByEstado(boolean f);
-
     @Query("SELECT new org.wispcrm.modelo.FacturaDto(f.id, CONCAT(c.nombres,' ',c.apellidos) as nombres, "
             + "c.telefono,  f.valor, c.diapago, DATEDIFF(CURRENT_TIMESTAMP() , f.fechapago) as mora) "
             + " FROM Factura f JOIN f.cliente c WHERE f.estado=true ")
     List<FacturaDto> listadoFacturasPendientes();
 
     @Query(value = "SELECT sum(valor) FROM Factura WHERE estado=true and periodo=MONTH(CURRENT_TIMESTAMP)")
-    public Long totalFacturasPendientesMes();
+    Long totalFacturasPendientesMes();
 
     @Query(value = "SELECT count(*) FROM Factura WHERE estado=true and periodo=MONTH(CURRENT_TIMESTAMP)")
-    public Long totalCantidadFacturasMes();
+    Long totalCantidadFacturasMes();
 
     @Query(value = "SELECT sum(valor) FROM Factura WHERE estado=false and periodo=MONTH(CURRENT_TIMESTAMP)")
-    public Long totalFacturasPagadasMes();
+    Long totalFacturasPagadasMes();
 
     @Query(value = "SELECT sum(valor) FROM Factura WHERE estado=true")
-    public Long totalFacturasPendientesHistorico();
+    Long totalFacturasPendientesHistorico();
 
     @Query(value = "SELECT count(*) FROM Factura WHERE estado=true")
-    public Long totalCantidadFacturasHistorico();
+    Long totalCantidadFacturasHistorico();
 
     @Query(value = "SELECT sum(valor) FROM Factura WHERE estado=false")
-    public Long totalFacturasPagadasHistorico();
+    Long totalFacturasPagadasHistorico();
 
     @Query(value = "SELECT count(*) FROM Factura WHERE estado=false and periodo=MONTH(CURRENT_TIMESTAMP)")
-    public int existFacturaCreada();
+    int existFacturaCreada();
 
     @Query("SELECT new org.wispcrm.modelo.ResumenFacturasDTO(" +
             "COUNT(*), " +
@@ -53,6 +49,6 @@ public interface InterfaceFacturas extends CrudRepository<Factura, Integer> {
             "FROM Factura " +
             "WHERE estado = true " +
             "AND MONTH(createAt) = MONTH(CURRENT_DATE)")
-    public ResumenFacturasDTO getResumenFacturasMes();
+    ResumenFacturasDTO getResumenFacturasMes();
 
 }

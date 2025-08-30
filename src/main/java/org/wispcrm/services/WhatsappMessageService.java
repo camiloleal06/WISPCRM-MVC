@@ -101,7 +101,7 @@ public class WhatsappMessageService {
         logResponse(response);
     }
 
-    public void sendDocumentAndMessageWasenderapi(String clientNumber, String msg,  String pathDocument)
+    public void sendDocumentAndMessageWasenderapi(String clientNumber, String msg,  String pathDocument,String fileName)
             throws IOException, InterruptedException {
 
         HttpClient client = HttpClient.newHttpClient();
@@ -111,6 +111,7 @@ public class WhatsappMessageService {
         payload.put("to", AREA_CODE+clientNumber);
         payload.put("text", msg);
         payload.put("documentUrl", pathDocument);
+        payload.put("fileName", fileName);
         String jsonPayload = mapper.writeValueAsString(payload);
 
         HttpRequest request = getBuilder(jsonPayload)

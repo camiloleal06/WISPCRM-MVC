@@ -114,7 +114,7 @@ public class FacturaController {
                     .filter(cliente -> cliente.getEstado() == EstadoCliente.ACTIVO)
                     .collect(Collectors.toList());
 
-            this.createFacturasEntreDiaInicialDiaFinal(listaClientes);
+            createFacturasEntreDiaInicialDiaFinal(listaClientes);
         }
 
         if (dayOfMonth >= DIA_PAGO_ONCE && dayOfMonth <= DIA_PAGO_VEINTE) {
@@ -123,7 +123,7 @@ public class FacturaController {
                             DIA_PAGO_VEINTE).stream()
                     .filter(cliente -> cliente.getEstado() == EstadoCliente.ACTIVO)
                     .collect(Collectors.toList());
-            this.createFacturasEntreDiaInicialDiaFinal(listaClientes);
+           createFacturasEntreDiaInicialDiaFinal(listaClientes);
         }
 
         if (dayOfMonth >= DIA_PAGO_VEINTI_UNO) {
@@ -132,7 +132,7 @@ public class FacturaController {
                             DIA_TREINTI_UNO).stream()
                     .filter(cliente -> cliente.getEstado() == EstadoCliente.ACTIVO)
                     .collect(Collectors.toList());
-            this.createFacturasEntreDiaInicialDiaFinal(listaClientes);
+           createFacturasEntreDiaInicialDiaFinal(listaClientes);
         }
 
         flash.addFlashAttribute(INFO,
@@ -206,7 +206,7 @@ public class FacturaController {
             RedirectAttributes flash) throws IOException, InterruptedException {
         Factura factura = facturaDao.findFacturabyid(id);
         if (factura == null) {
-            flash.addFlashAttribute("error", "Factura no encontrada");
+            flash.addFlashAttribute(ERROR, "Factura no encontrada");
             return REDIRECT_LISTARFACTURA;
         }
 
@@ -346,7 +346,6 @@ public class FacturaController {
         factura.setPeriodo(LocalDate.now().getMonthValue());
         Factura facturaSend = facturaDao.save(factura);
         sendWhatsAppMessageNuevaFacturaGenerada(facturaSend);
-      ///  emailService.sendMail(facturaSend);
         return factura;
     }
 
@@ -474,11 +473,10 @@ public class FacturaController {
 
             int facturaId = factura.getId();
             String telefono = factura.getCliente().getTelefono();
-             String fileName = factura.getId() + PAGADA_PDF;
+            String fileName = factura.getId() + PAGADA_PDF;
             String ruta = ConstantMensaje.RUTA_DESCARGA_FACTURA_DOCS + fileName;
             String nombres = factura.getCliente().getNombres() + " " + factura.getCliente().getApellidos();
             String mensaje = ESTIMADO_A + nombres + ConstantMensaje.HEMOS_RECIBIDO_SU_PAGO + facturaId;
-
             reporte.pagoPdfReport(facturaId, fileName);
             ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
             excuteSendMsgToWhatsApp(executorService, mensaje, telefono,
@@ -514,7 +512,7 @@ public class FacturaController {
         executorService.schedule(() -> {
             try {
                 log.info("Envio documento : {}", ruta);
-                whatsappMessageService.sendDocumentAndMessageWasenderapi(telefono, mensaje, ruta);
+                whatsappMessageService.sendDocumentAndMessageWasenderapi(telefono, mensaje, ruta,fileName);
             } catch (IOException e) {
                 log.error(e.getMessage());
             } catch (InterruptedException e) {

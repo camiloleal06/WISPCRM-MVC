@@ -25,4 +25,9 @@ public interface InterfacePagos extends JpaRepository<Pago, Integer> {
             + "FROM Pago p JOIN p.factura f JOIN f.cliente c WHERE f.periodo=MONTH(CURRENT_TIMESTAMP)")
     public Page<PagoDTO> lista(Pageable pageable);
 
+    @Query("SELECT new org.wispcrm.modelo.PagoDTO(" +
+            "p.id, p.pago, f.id, CONCAT(c.nombres,' ',c.apellidos), p.fechaPago, f.estado) " +
+            "FROM Pago p JOIN p.factura f JOIN f.cliente c " +
+            "ORDER BY p.fechaPago DESC")
+    List<PagoDTO> findLastTenPagos(Pageable pageable);
 }

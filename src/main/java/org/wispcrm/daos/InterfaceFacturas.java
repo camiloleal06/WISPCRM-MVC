@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import org.wispcrm.modelo.Cliente;
 import org.wispcrm.modelo.Factura;
 import org.wispcrm.modelo.FacturaDto;
+import org.wispcrm.modelo.ResumenFacturasDTO;
 
 @Repository
 public interface InterfaceFacturas extends CrudRepository<Factura, Integer> {
@@ -45,4 +46,13 @@ public interface InterfaceFacturas extends CrudRepository<Factura, Integer> {
 
     @Query(value = "SELECT count(*) FROM Factura WHERE estado=false and periodo=MONTH(CURRENT_TIMESTAMP)")
     public int existFacturaCreada();
+
+    @Query("SELECT new org.wispcrm.modelo.ResumenFacturasDTO(" +
+            "COUNT(*), " +
+            "SUM(valor)) " +
+            "FROM Factura " +
+            "WHERE estado = true " +
+            "AND MONTH(createAt) = MONTH(CURRENT_DATE)")
+    public ResumenFacturasDTO getResumenFacturasMes();
+
 }

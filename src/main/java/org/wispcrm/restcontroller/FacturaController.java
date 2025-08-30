@@ -40,6 +40,7 @@ import org.wispcrm.modelo.EstadoCliente;
 import org.wispcrm.modelo.Factura;
 import org.wispcrm.modelo.Pago;
 import org.wispcrm.modelo.PagoDTO;
+import org.wispcrm.modelo.PaymentNotificationTemplate;
 import org.wispcrm.services.*;
 import org.wispcrm.utils.ConstantMensaje;
 
@@ -223,18 +224,13 @@ public class FacturaController {
         String nombres = facturaSaved.getCliente().getNombres() + " " + factura.getCliente().getApellidos();
         String facturaId = String.valueOf(facturaSaved.getId());
 
-        // Construir mensaje usando StringBuilder para mejor rendimiento
-        StringBuilder mensaje = new StringBuilder()
-                .append(ESTIMADO_A)
-                .append(nombres)
-                .append(ConstantMensaje.HEMOS_RECIBIDO_SU_PAGO)
-                .append(facturaId)
-                .append("por valor de : ")
-                .append(facturaSaved.getValor());
+        PaymentNotificationTemplate.PaymentData data = new PaymentNotificationTemplate.PaymentData(
+                nombres, String.valueOf(facturaSaved.getValor()),
+                LocalDate.now(), facturaId,  "SysRed");
 
+        String mensaje = PaymentNotificationTemplate.buildMessage(data, PaymentNotificationTemplate.Tone.FORMAL);
 
-     //  sendWhatsAppMessagePagoRecibdo(facturaSaved);
-        whatsappMessageService.sendSimpleMessageWasenderapi(telefono, mensaje.toString());
+        whatsappMessageService.sendSimpleMessageWasenderapi(telefono, mensaje);
 
         whatsappMessageService.sendSimpleMessageToGroupWasApiSender(
                 WHATSAPP_GROUP_ID,

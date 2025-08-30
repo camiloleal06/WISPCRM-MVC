@@ -148,7 +148,7 @@ public class ClienteController {
         cliente.setEstado(EstadoCliente.INACTIVO);
         clienteRepository.save(cliente);
         logClienteOperation("eliminarCliente", SUCCESS,"Se ha eliminado el cliente {}",cliente);
-        cacheManager.getCache("clientes").clear();
+        cacheManager.getCache("lista-clientes").clear();
 
         return REDIRECT_LISTAR;
     }
@@ -180,7 +180,7 @@ public class ClienteController {
             return REDIRECT_LISTAR;
         }
         finally {
-            cacheManager.getCache("clientes").clear();
+            cacheManager.getCache("lista-clientes").clear();
         }
     }
 }

@@ -28,7 +28,7 @@ public interface ClienteDao extends JpaRepository<Cliente, Integer> {
 
     List<Cliente> findByDiapagoBetween(int diaInicial, int diaFinal);
 
-    @Cacheable(value = "clientes")
+    @Cacheable(value = "lista-clientes")
     @Query("SELECT new org.wispcrm.modelo.ClienteDTO" + "(c.id, c.identificacion, CONCAT(c.nombres,' ',c.apellidos), "
             + "c.email, c.telefono,  p.precio, c.estado) " + " FROM Cliente c JOIN c.planes p")
     List<ClienteDTO> lista();

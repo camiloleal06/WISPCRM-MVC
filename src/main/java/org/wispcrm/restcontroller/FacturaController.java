@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -215,13 +214,27 @@ public class FacturaController {
                 .saldo(0)
                 .factura(factura)
                 .build();
-
         factura.setEstado(false);
-        String nombres = factura.getCliente().getNombres() + " " + factura.getCliente().getApellidos();
 
         pagosDAO.save(pago);
+
         Factura facturaSaved = facturaDao.save(factura);
-        sendWhatsAppMessagePagoRecibdo(facturaSaved);
+        String telefono = facturaSaved.getCliente().getTelefono();
+        String nombres = facturaSaved.getCliente().getNombres() + " " + factura.getCliente().getApellidos();
+        String facturaId = String.valueOf(facturaSaved.getId());
+
+        // Construir mensaje usando StringBuilder para mejor rendimiento
+        StringBuilder mensaje = new StringBuilder()
+                .append(ESTIMADO_A)
+                .append(nombres)
+                .append(ConstantMensaje.HEMOS_RECIBIDO_SU_PAGO)
+                .append(facturaId)
+                .append("por valor de : ")
+                .append(facturaSaved.getValor());
+
+
+     //  sendWhatsAppMessagePagoRecibdo(facturaSaved);
+        whatsappMessageService.sendSimpleMessageWasenderapi(telefono, mensaje.toString());
 
         whatsappMessageService.sendSimpleMessageToGroupWasApiSender(
                 WHATSAPP_GROUP_ID,

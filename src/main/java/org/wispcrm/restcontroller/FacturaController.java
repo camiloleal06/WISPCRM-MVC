@@ -38,6 +38,7 @@ import org.wispcrm.interfaces.ClienteInterface;
 import org.wispcrm.modelo.Cliente;
 import org.wispcrm.modelo.EstadoCliente;
 import org.wispcrm.modelo.Factura;
+import org.wispcrm.modelo.InvoiceTemplate;
 import org.wispcrm.modelo.Pago;
 import org.wispcrm.modelo.PagoDTO;
 import org.wispcrm.modelo.PaymentNotificationTemplate;
@@ -515,6 +516,30 @@ public class FacturaController {
         }
     }
 
+    private void sendWhatsAppMessageNuevaFacturaGeneradaTemplate(Factura factura)
+            throws IOException, InterruptedException {
+
+            int facturaId = factura.getId();
+          //  String fileName = factura.getId() + ".pdf";
+           // String ruta = ConstantMensaje.RUTA_DESCARGA_FACTURA_DOCS + fileName;
+            String telefono = factura.getCliente().getTelefono();
+            String nombres = factura.getCliente()
+                    .getNombres() + " " + factura.getCliente().getApellidos();
+
+            String mensaje = InvoiceTemplate.generarMensajeFactura(nombres,
+                    LocalDate.now().getMonth().toString(), LocalDate.now().getYear(),
+                    String.valueOf(factura.getId()), factura.getValor(),
+                    factura.getFechavencimiento().toString(), "SYSRED");
+
+
+            ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+          excuteSendMsgToWhatsAppAsyn(executorService, mensaje, telefono);
+
+    }
+
+
+
+
     private void excuteSendMsgToWhatsApp(
             ScheduledExecutorService executorService, String mensaje,
             String telefono, String fileName, String ruta) {
@@ -522,6 +547,21 @@ public class FacturaController {
             try {
                 log.info("Envio documento : {}", ruta);
                 whatsappMessageService.sendDocumentAndMessageWasenderapi(telefono, mensaje, ruta,fileName);
+            } catch (IOException e) {
+                log.error(e.getMessage());
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }, 2, TimeUnit.SECONDS);
+    }
+
+    private void excuteSendMsgToWhatsAppAsyn(
+            ScheduledExecutorService executorService, String mensaje,
+            String telefono) {
+        executorService.schedule(() -> {
+            try {
+                log.info("Envio factura");
+                whatsappMessageService.sendSimpleMessageWasenderapi(telefono, mensaje);
             } catch (IOException e) {
                 log.error(e.getMessage());
             } catch (InterruptedException e) {

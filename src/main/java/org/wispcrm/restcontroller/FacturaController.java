@@ -355,7 +355,8 @@ public class FacturaController {
         factura.setNotificacion(ConstantMensaje.ZERO_INT);
         factura.setPeriodo(LocalDate.now().getMonthValue());
         Factura facturaSend = facturaDao.save(factura);
-        sendWhatsAppMessageNuevaFacturaGenerada(facturaSend);
+       // sendWhatsAppMessageNuevaFacturaGenerada(facturaSend);
+        sendWhatsAppMessageNuevaFacturaGeneradaTemplate(facturaSend);
         return factura;
     }
 
@@ -516,12 +517,8 @@ public class FacturaController {
         }
     }
 
-    private void sendWhatsAppMessageNuevaFacturaGeneradaTemplate(Factura factura)
-            throws IOException, InterruptedException {
+    private void sendWhatsAppMessageNuevaFacturaGeneradaTemplate(Factura factura) {
 
-            int facturaId = factura.getId();
-          //  String fileName = factura.getId() + ".pdf";
-           // String ruta = ConstantMensaje.RUTA_DESCARGA_FACTURA_DOCS + fileName;
             String telefono = factura.getCliente().getTelefono();
             String nombres = factura.getCliente()
                     .getNombres() + " " + factura.getCliente().getApellidos();
@@ -531,8 +528,7 @@ public class FacturaController {
                     String.valueOf(factura.getId()), factura.getValor(),
                     factura.getFechavencimiento().toString(), "SYSRED");
 
-
-            ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+          ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
           excuteSendMsgToWhatsAppAsyn(executorService, mensaje, telefono);
 
     }

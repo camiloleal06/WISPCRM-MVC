@@ -60,7 +60,7 @@ public class ImageUploadController {
     private String getImageUrl(MultipartFile image, Model model) {
         String imageUrl;
         try {
-            File savedFile = new File("/var/www/html/" + image.getOriginalFilename());
+            File savedFile = new File("/var/www/html/uploads/" + image.getOriginalFilename());
             image.transferTo(savedFile);
             imageUrl = "http://sysredcartagena.duckdns.org/uploads/" + image.getOriginalFilename();
         }

@@ -23,6 +23,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
                 .antMatchers("/build/", "/dist/**", "/plugins/**", "/docs/**","/css/**")
                 .permitAll().antMatchers("/descargarfactura/**")
+                .permitAll().antMatchers("/send/**")
                 .permitAll()
                 .antMatchers("/descargarorden/**").permitAll()
                 .antMatchers("/api/**").permitAll()

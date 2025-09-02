@@ -67,6 +67,9 @@ public class HomeController {
             throw new RuntimeException("Error al cargar los datos", e);
         }
 
+        if (currentUserName().equals("cachi"))
+            return "sendMessage";
+        else
         return "home";
     }
 

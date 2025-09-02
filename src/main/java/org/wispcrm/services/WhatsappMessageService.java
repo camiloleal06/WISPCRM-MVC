@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import static com.google.api.client.http.HttpMethods.POST;
@@ -101,6 +102,7 @@ public class WhatsappMessageService {
         logResponse(response);
     }
 
+
     public void sendDocumentAndMessageWasenderapi(String clientNumber, String msg,  String pathDocument,String fileName)
             throws IOException, InterruptedException {
 
@@ -112,6 +114,28 @@ public class WhatsappMessageService {
         payload.put("text", msg);
         payload.put("documentUrl", pathDocument);
         payload.put("fileName", fileName);
+        String jsonPayload = mapper.writeValueAsString(payload);
+
+        HttpRequest request = getBuilder(jsonPayload)
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        logResponse(response.body());
+    }
+
+
+    @Async("threadPoolTaskExecutor")
+    public void sendImageAndMessageWasenderapi(String clientNumber, String msg,  String imageUrl)
+            throws IOException, InterruptedException {
+
+        HttpClient client = HttpClient.newHttpClient();
+
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, String> payload = new HashMap<>();
+        payload.put("to", AREA_CODE+clientNumber);
+        payload.put("text", msg);
+        payload.put("imageUrl", imageUrl);
         String jsonPayload = mapper.writeValueAsString(payload);
 
         HttpRequest request = getBuilder(jsonPayload)

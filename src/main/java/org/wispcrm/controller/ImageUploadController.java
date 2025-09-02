@@ -21,6 +21,8 @@ public class ImageUploadController {
 
     private final WhatsappMessageService whatsappMessageService;
 
+    private String extension = "";
+
     public ImageUploadController(WhatsappMessageService whatsappMessageService) {
         this.whatsappMessageService = whatsappMessageService;
     }
@@ -35,8 +37,7 @@ public class ImageUploadController {
             throws InterruptedException {
         if (!file.isEmpty()) {
             try {
-                String extension = "";
-                String originalName = file.getOriginalFilename();
+               String originalName = file.getOriginalFilename();
                 if (originalName != null && originalName.contains(".")) {
                     extension = originalName.substring(originalName.lastIndexOf("."));
                 }
@@ -45,7 +46,7 @@ public class ImageUploadController {
                 Files.createDirectories(path.getParent());
                 Files.write(path, file.getBytes());
                 model.addAttribute("message", "Imagen subida y enviada por WhatsApp con éxito");
-                model.addAttribute("imageUrl", publicUrl);
+               // model.addAttribute("imageUrl", publicUrl);
 
             } catch (IOException e) {
                 model.addAttribute("message", "Error: " + e.getMessage());

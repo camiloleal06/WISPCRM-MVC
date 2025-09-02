@@ -8,10 +8,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.wispcrm.services.WhatsappMessageService;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -21,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 @Controller
 public class ImageUploadController {
 
+    public static final String STATUS = "status";
     private final WhatsappMessageService whatsappMessageService;
 
     public ImageUploadController(WhatsappMessageService whatsappMessageService) {
@@ -37,15 +36,40 @@ public class ImageUploadController {
 
     @PostMapping("/send")
     public String sendMessage(@RequestParam String phones,
-            @RequestParam String message,
-            Model model) throws IOException, InterruptedException {
+            @RequestParam String message, @RequestParam("image") MultipartFile image,
+            Model model) {
+        try {
+            String imageUrl = null;
+            if (image != null && !image.isEmpty()) {
+                imageUrl = getImageUrl(image, model);
+            }
+            else {
+                imageUrl = publicUrl;
+            }
+
         String[] phoneList = phones.split(",");
-        sendBulkMessages(List.of(phoneList), message, publicUrl);
-        model.addAttribute("status", "Mensaje enviado correctamente a " + phoneList.length + " números.");
+        sendBulkMessages(List.of(phoneList), message, imageUrl);
+        model.addAttribute(STATUS, "Mensaje enviado correctamente a " + phoneList.length + " números.");
+
+         } catch (Exception e) {
+            model.addAttribute(STATUS, "Error al enviar el mensaje: " + e.getMessage());
+        }
         return "sendMessage";
     }
 
-
+    private String getImageUrl(MultipartFile image, Model model) {
+        String imageUrl;
+        try {
+            File savedFile = new File("/var/www/html/" + image.getOriginalFilename());
+            image.transferTo(savedFile);
+            imageUrl = "http://sysredcartagena.duckdns.org/uploads/" + image.getOriginalFilename();
+        }
+        catch (IOException e) {
+            imageUrl = publicUrl;
+            model.addAttribute(STATUS, "Error al subir la imagen: se enviara imagen por defecto " + e.getMessage());
+        }
+        return imageUrl;
+    }
 
     public void sendBulkMessages(List<String> phoneList, String message, String publicUrl) {
         if (phoneList.isEmpty()) return;

@@ -23,7 +23,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
                 .antMatchers("/build/", "/dist/**", "/plugins/**", "/docs/**","/css/**")
                 .permitAll().antMatchers("/descargarfactura/**")
-                .permitAll().antMatchers("/send/**")
+                //.permitAll().antMatchers("/send/**")
                 .permitAll()
                 .antMatchers("/descargarorden/**").permitAll()
                 .antMatchers("/api/**").permitAll()
@@ -67,6 +67,9 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                                 .password("audiluz").roles(USER))
                 .withUser(users.username("jose")
                         .password("jose")
+                        .roles(USER))
+                .withUser(users.username("cachi")
+                        .password("cachi")
                         .roles(USER));
     }
 }

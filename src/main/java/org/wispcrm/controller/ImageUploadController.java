@@ -44,12 +44,6 @@ public class ImageUploadController {
                 Path path = Paths.get(UPLOAD_DIR + FIXED_NAME + extension);
                 Files.createDirectories(path.getParent());
                 Files.write(path, file.getBytes());
-
-                String publicUrl = "http://sysredcartagena.duckdns.org/images/" + FIXED_NAME + extension;
-
-                // Enviar a WhatsApp
-                whatsappMessageService.sendImageAndMessageWasenderapi("3225996394", "📷 Holis",publicUrl);
-
                 model.addAttribute("message", "Imagen subida y enviada por WhatsApp con éxito");
                 model.addAttribute("imageUrl", publicUrl);
 
@@ -59,4 +53,13 @@ public class ImageUploadController {
         }
         return "upload";
     }
+
+    @PostMapping("/send-message")
+    public String handleFileUpload(Model model)
+            throws InterruptedException, IOException {
+        String publicUrl = "http://sysredcartagena.duckdns.org/" + FIXED_NAME + extension;
+        whatsappMessageService.sendImageAndMessageWasenderapi("3225996394", "📷 Holis",publicUrl);
+        return "upload";
+    }
+
 }

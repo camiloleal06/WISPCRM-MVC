@@ -76,7 +76,11 @@
 <div class="container">
     <h2>📲 Enviar mensaje WhatsApp</h2>
 
-    <form method="post" th:action="@{/send}">
+    <form method="post" th:action="@{/send}" enctype="multipart/form-data">
+        <!-- Imagen -->
+        <label for="image">Imagen (opcional)</label>
+        <input type="file" id="image" name="image" accept="image/*" />
+
         <!-- Números de teléfono -->
         <label for="phones">Números de teléfono</label>
         <textarea id="phones" name="phones" rows="5" placeholder="3001112233,3009998877" required/></textarea>

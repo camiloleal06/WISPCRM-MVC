@@ -17,18 +17,13 @@ import org.wispcrm.services.WhatsappMessageService;
 @RequiredArgsConstructor
 public class FacturacionProgramada {
 
-    private static final int DIAS_MORA_MINIMO = 4;
+    private static final int DIAS_MORA_MINIMO = 5;
     private static final int DIAS_MORA_MAXIMO = 30;
     private final InterfaceFacturas facturaDao;
     private final WhatsappMessageService whatsappMessageService;
 
-    @Scheduled(cron = "${sysred.notification.cron}")
+    @Scheduled(cron = "0 0 9 * * 2,6")
     public void scheduledPaymentNotification() {
-        if (!debeEjecutarHoy()) {
-            log.info("Hoy no corresponde enviar mensajes");
-            return;
-        }
-
         try {
             log.info("Iniciando envío de mensajes programados");
             List<FacturaDto> facturas = facturaDao.listadoFacturasPendientes();
@@ -41,21 +36,12 @@ public class FacturacionProgramada {
         }
     }
 
-    private boolean debeEjecutarHoy() {
-        LocalDate hoy = LocalDate.now();
-        DayOfWeek diaSemana = hoy.getDayOfWeek();
-        if (diaSemana == DayOfWeek.SUNDAY) {
-            return false;
-        }
-        return hoy.getDayOfMonth() % 2 == 0;
-    }
-
     private boolean tieneMoreRelevante(FacturaDto factura) {
         if (factura == null) {
             log.warn("Se recibió una factura nula");
             return false;
         }
-        return factura.getMora() > DIAS_MORA_MINIMO && factura.getMora() < DIAS_MORA_MAXIMO;
+        return factura.getMora() > DIAS_MORA_MINIMO && factura.getMora() <= DIAS_MORA_MAXIMO;
     }
 
     private void enviarMensaje(FacturaDto factura) {

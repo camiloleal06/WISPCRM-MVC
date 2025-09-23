@@ -573,6 +573,7 @@ public class FacturaController {
         String telefono = factura.getCliente().getTelefono();
         String nombre = factura.getCliente()
                 .getNombres() + " " + factura.getCliente().getApellidos();
+        log.info("Factura a enviar "+ factura);
         try {
             whatsappMessageService.sendSimpleMessageWasenderapi(telefono,
                     "Estimado(a) : " + nombre + " No hemos recibido el pago de su factura # " + factura.getId() + " por valor de : " + factura.getValor());

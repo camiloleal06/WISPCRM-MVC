@@ -149,6 +149,8 @@ public class WhatsappMessageService {
     public void sendSimpleMessageWasenderapi(String clientNumber, String msg)
             throws IOException, InterruptedException {
 
+        log.info("Datos"+" tOKEN :"+tokenBearerWhatsappApiSender+ " URI: "+uriWhatsappApiSender);
+
         HttpClient client = HttpClient.newHttpClient();
 
         ObjectMapper mapper = new ObjectMapper();

@@ -102,20 +102,15 @@ public class OrdenController {
             return;
         }
 
-        try {
-            // Use StringBuilder for better performance with string concatenation
-            StringBuilder messageBuilder = new StringBuilder().append(
-                            "Estimado Tecnico, Se ha generado una orden de servicio para el cliente : ")
-                    .append(orden.getCliente().getNombres()).append(" ")
-                    .append(ConstantMensaje.RUTA_DESCARGA_ORDEN_DE_SERVICIO)
-                    .append(orden.getId());
+        // Use StringBuilder for better performance with string concatenation
+        StringBuilder messageBuilder = new StringBuilder().append(
+                        "Estimado Tecnico, Se ha generado una orden de servicio para el cliente : ")
+                .append(orden.getCliente().getNombres()).append(" ")
+                .append(ConstantMensaje.RUTA_DESCARGA_ORDEN_DE_SERVICIO)
+                .append(orden.getId());
 
-            whatsappMessageService.sendSimpleMessageToGroupWasApiSender(
-                    "120363146011086828@g.us", messageBuilder.toString());
-        } catch (IOException | InterruptedException e) {
-            log.error("Error al enviar mensaje de WhatsApp: ", e);
-
-        }
+        whatsappMessageService.sendSimpleMessageToGroupWasApiSender(
+                "120363146011086828@g.us", messageBuilder.toString());
     }
 
 

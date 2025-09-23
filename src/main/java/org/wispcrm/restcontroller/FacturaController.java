@@ -529,9 +529,6 @@ public class FacturaController {
 
     }
 
-
-
-
     private void excuteSendMsgToWhatsApp(
             ScheduledExecutorService executorService, String mensaje,
             String telefono, String fileName, String ruta) {

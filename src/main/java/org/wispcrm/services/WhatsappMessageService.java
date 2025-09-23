@@ -28,10 +28,10 @@ public class WhatsappMessageService {
     public static final String APPLICATION_JSON = "application/json";
     public static final String ENVIO_DE_MENSAJE_DE_WHATS_APP = "Envio de mensaje de whatsApp {}";
 
-    @Value("${message.uriWhatsappApiSender}")
-    private String uriWhatsappApiSender;
-    @Value("${message.tokenBearerWhatsappApiSender}")
-    private String tokenBearerWhatsappApiSender;
+   // @Value("${message.uriWhatsappApiSender}")
+    private String tokenBearerWhatsappApiSender = "Bearer 53d2b099e4caa7a4aac7941bbe0b843918d68ea86ec53127bb676608d38b2a20";
+   // @Value("${message.tokenBearerWhatsappApiSender}")
+    private String uriWhatsappApiSender = "https://www.wasenderapi.com/api/send-message";
 
     public WhatsappMessageService() {
         // TODO document why this constructor is empty

@@ -149,14 +149,8 @@ public class FacturaController {
         clienteDao.findAll().stream()
                 .filter(cliente -> cliente.getEstado() == EstadoCliente.ACTIVO)
                 .collect(Collectors.toList()).forEach(c -> {
-                    try {
-                        whatsappMessageService.sendSimpleMessageWasenderapi("3225996394",
-                                "Estimado cliente, tenemos un daño en nuestros servicios por parte de nuestros proveedores, " + "por lo cual habrá intermitencia o caida total. " + "Agradecemos su comprension");
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
+                    whatsappMessageService.sendSimpleMessageWasenderapi("3225996394",
+                            "Estimado cliente, tenemos un daño en nuestros servicios por parte de nuestros proveedores, " + "por lo cual habrá intermitencia o caida total. " + "Agradecemos su comprension");
                 });
 
         return REDIRECT_LISTARFACTURA;
@@ -542,14 +536,8 @@ public class FacturaController {
             ScheduledExecutorService executorService, String mensaje,
             String telefono, String fileName, String ruta) {
         executorService.schedule(() -> {
-            try {
-                log.info("Envio documento : {}", ruta);
-                whatsappMessageService.sendDocumentAndMessageWasenderapi(telefono, mensaje, ruta,fileName);
-            } catch (IOException e) {
-                log.error(e.getMessage());
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            log.info("Envio documento : {}", ruta);
+            whatsappMessageService.sendDocumentAndMessageWasenderapi(telefono, mensaje, ruta,fileName);
         }, 2, TimeUnit.SECONDS);
     }
 
@@ -557,14 +545,8 @@ public class FacturaController {
             ScheduledExecutorService executorService, String mensaje,
             String telefono) {
         executorService.schedule(() -> {
-            try {
-                log.info("Envio factura");
-                whatsappMessageService.sendSimpleMessageWasenderapi(telefono, mensaje);
-            } catch (IOException e) {
-                log.error(e.getMessage());
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            log.info("Envio factura");
+            whatsappMessageService.sendSimpleMessageWasenderapi(telefono, mensaje);
         }, 2, TimeUnit.SECONDS);
     }
 
@@ -576,14 +558,8 @@ public class FacturaController {
         String nombre = factura.getCliente()
                 .getNombres() + " " + factura.getCliente().getApellidos();
         log.info("Factura a enviar "+ factura);
-        try {
-            whatsappMessageService.sendSimpleMessageWasenderapi(telefono,
+        whatsappMessageService.sendSimpleMessageWasenderapi(telefono,
                     "Estimado(a) : " + nombre + " No hemos recibido el pago de su factura # " + factura.getId() + " por valor de : " + factura.getValor());
-         } catch (RuntimeException | IOException e) {
-            log.error(ERROR, new RuntimeException());
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public Date getDateAsUtilDate(String fecha) throws ParseException {

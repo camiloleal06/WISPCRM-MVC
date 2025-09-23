@@ -83,6 +83,7 @@ public class WhatsappMessageService {
     public void sendSimpleMessageWasenderapi(String clientNumber, String msg)
             throws IOException, InterruptedException {
 
+
         log.info("Datos"+" tOKEN :"+tokenBearerWhatsappApiSender+ " URI: "+uriWhatsappApiSender);
 
         HttpClient client = HttpClient.newHttpClient();
@@ -92,6 +93,7 @@ public class WhatsappMessageService {
         payload.put("to", AREA_CODE+clientNumber);
         payload.put("text", msg);
         String jsonPayload = mapper.writeValueAsString(payload);
+        log.info("Datos"+jsonPayload);
 
         HttpRequest.Builder requestBuilder = getBuilder(jsonPayload);
 

@@ -61,11 +61,8 @@ spring:
 factura:
   path: "${PATH_FACTURAS:/var/www/html/facturas/}"
 message :
-  urlChat: "https://www.wasenderapi.com/api/send-message"
-  urlDocument : "https://www.wasenderapi.com/api/send-message"
   uriWhatsappApiSender: "https://www.wasenderapi.com/api/send-message"
   tokenBearerWhatsappApiSender: "Bearer 53d2b099e4caa7a4aac7941bbe0b843918d68ea86ec53127bb676608d38b2a20"
-  msgToken : "TOKEN:hjfsf"
 server:
   port: ${PORT:8889}
   tomcat:

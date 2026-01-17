@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 import javax.servlet.http.HttpServletResponse;
 
 import lombok.RequiredArgsConstructor;
+import me.legrange.mikrotik.MikrotikApiException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.wispcrm.daos.ClienteDao;
 import org.wispcrm.daos.InterfacePagos;
 import org.wispcrm.interfaces.ClienteInterface;
+import org.wispcrm.mikrotik.Funciones;
 import org.wispcrm.modelo.Cliente;
 import org.wispcrm.modelo.EstadoCliente;
 import org.wispcrm.modelo.Factura;
@@ -77,6 +79,7 @@ public class FacturaController {
     private final EnviarSMS smsService;
     private final EmailService emailService;
     private final WhatsappMessageService whatsappMessageService;
+    private final Funciones funciones;
 
     LocalDate fechaActualLocalDate = LocalDate.now();
     Calendar fechavencimiento = Calendar.getInstance();
@@ -149,8 +152,15 @@ public class FacturaController {
         clienteDao.findAll().stream()
                 .filter(cliente -> cliente.getEstado() == EstadoCliente.ACTIVO)
                 .collect(Collectors.toList()).forEach(c -> {
-                    whatsappMessageService.sendSimpleMessageWasenderapi("3225996394",
-                            "Estimado cliente, tenemos un daño en nuestros servicios por parte de nuestros proveedores, " + "por lo cual habrá intermitencia o caida total. " + "Agradecemos su comprension");
+                    try {
+                        whatsappMessageService.sendSimpleMessage("3225996394",
+                                "Estimado cliente, tenemos un daño en nuestros servicios por parte de nuestros proveedores, "
+                                        + "por lo cual habrá intermitencia o caida total. " + "Agradecemos su comprension");
+
+
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 });
 
         return REDIRECT_LISTARFACTURA;
@@ -269,13 +279,14 @@ public class FacturaController {
 
     @GetMapping("/recordar/{id}")
     public String recordar(@PathVariable("id") int id, SessionStatus status,
-            Model modelo, RedirectAttributes flash) {
+            Model modelo, RedirectAttributes flash)
+            throws MikrotikApiException {
         Factura factura = facturaDao.findFacturabyid(id);
         String telefono = factura.getCliente().getTelefono();
-
         factura.setNotificacion(factura.getNotificacion() + 1);
         facturaDao.save(factura);
         this.sendWhatsAppMessageNotificacionDePago(factura);
+        funciones.addlistsuspendidos("192.168.88.1", factura.getCliente().getNombres());
         flash.addFlashAttribute(INFO,
                 "El mensaje ha sido enviado a : " + telefono);
         status.setComplete();

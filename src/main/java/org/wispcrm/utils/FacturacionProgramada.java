@@ -43,21 +43,12 @@ public class FacturacionProgramada {
     }
 
     private void enviarMensaje(FacturaDto factura) {
-        try {
-            String mensaje = construirMensaje(factura);
-            whatsappMessageService.sendSimpleMessageWasenderapi(
-                    factura.getTelefonoCliente(),
-                    mensaje
-            );
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.warn("Operación interrumpida", e);
-        } catch (IOException e) {
-            log.error("Error de IO al enviar mensaje para factura {}: {}",
-                    factura.getIdFactura(), e.getMessage());
-        }
+        String mensaje = construirMensaje(factura);
+        whatsappMessageService.sendSimpleMessageWasenderapi(
+                factura.getTelefonoCliente(),
+                mensaje
+        );
     }
-
 
     private String construirMensaje(FacturaDto factura) {
         return String.format(

@@ -540,21 +540,12 @@ public class FacturaController {
 
     }
 
-
-
-
     private void excuteSendMsgToWhatsApp(
             ScheduledExecutorService executorService, String mensaje,
             String telefono, String fileName, String ruta) {
         executorService.schedule(() -> {
-            try {
-                log.info("Envio documento : {}", ruta);
-                whatsappMessageService.sendDocumentAndMessageWasenderapi(telefono, mensaje, ruta,fileName);
-            } catch (IOException e) {
-                log.error(e.getMessage());
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            log.info("Envio documento : {}", ruta);
+            whatsappMessageService.sendDocumentAndMessageWasenderapi(telefono, mensaje, ruta,fileName);
         }, 2, TimeUnit.SECONDS);
     }
 
@@ -562,14 +553,8 @@ public class FacturaController {
             ScheduledExecutorService executorService, String mensaje,
             String telefono) {
         executorService.schedule(() -> {
-            try {
-                log.info("Envio factura");
-                whatsappMessageService.sendSimpleMessageWasenderapi(telefono, mensaje);
-            } catch (IOException e) {
-                log.error(e.getMessage());
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            log.info("Envio factura");
+            whatsappMessageService.sendSimpleMessageWasenderapi(telefono, mensaje);
         }, 2, TimeUnit.SECONDS);
     }
 
@@ -580,14 +565,9 @@ public class FacturaController {
         String telefono = factura.getCliente().getTelefono();
         String nombre = factura.getCliente()
                 .getNombres() + " " + factura.getCliente().getApellidos();
-        try {
-            whatsappMessageService.sendSimpleMessageWasenderapi(telefono,
+        log.info("Factura a enviar "+ factura);
+        whatsappMessageService.sendSimpleMessageWasenderapi(telefono,
                     "Estimado(a) : " + nombre + " No hemos recibido el pago de su factura # " + factura.getId() + " por valor de : " + factura.getValor());
-         } catch (RuntimeException | IOException e) {
-            log.error(ERROR, new RuntimeException());
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public Date getDateAsUtilDate(String fecha) throws ParseException {

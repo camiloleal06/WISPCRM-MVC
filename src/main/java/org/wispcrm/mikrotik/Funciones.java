@@ -1,7 +1,9 @@
 package org.wispcrm.mikrotik;
 
 import me.legrange.mikrotik.MikrotikApiException;
+import org.springframework.stereotype.Service;
 
+@Service
 public class Funciones extends Conectar {
 
     public Funciones() {

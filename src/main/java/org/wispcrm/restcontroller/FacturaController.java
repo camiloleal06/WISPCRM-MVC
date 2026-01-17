@@ -152,15 +152,10 @@ public class FacturaController {
         clienteDao.findAll().stream()
                 .filter(cliente -> cliente.getEstado() == EstadoCliente.ACTIVO)
                 .collect(Collectors.toList()).forEach(c -> {
-                    try {
-                        whatsappMessageService.sendSimpleMessage("3225996394",
-                                "Estimado cliente, tenemos un daño en nuestros servicios por parte de nuestros proveedores, "
-                                        + "por lo cual habrá intermitencia o caida total. " + "Agradecemos su comprension");
+                    whatsappMessageService.sendSimpleMessageWasenderapi("3225996394",
+                            "Estimado cliente, tenemos un daño en nuestros servicios por parte de nuestros proveedores, "
+                                    + "por lo cual habrá intermitencia o caida total. " + "Agradecemos su comprension");
 
-
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
                 });
 
         return REDIRECT_LISTARFACTURA;

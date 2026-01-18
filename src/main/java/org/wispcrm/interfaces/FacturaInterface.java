@@ -2,8 +2,8 @@ package org.wispcrm.interfaces;
 
 import java.util.List;
 
-import org.wispcrm.modelo.Factura;
-import org.wispcrm.modelo.FacturaDto;
+import org.wispcrm.modelo.facturas.Factura;
+import org.wispcrm.modelo.facturas.FacturaDto;
 
 public interface FacturaInterface {
 

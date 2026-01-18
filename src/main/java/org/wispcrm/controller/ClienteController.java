@@ -6,8 +6,10 @@ import java.util.Objects;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.legrange.mikrotik.MikrotikApiException;
 import org.springframework.cache.CacheManager;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -22,9 +24,13 @@ import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.wispcrm.daos.ClienteDao;
 import org.wispcrm.daos.InterfaceFacturas;
-import org.wispcrm.modelo.Cliente;
-import org.wispcrm.modelo.ClienteDTO;
-import org.wispcrm.modelo.EstadoCliente;
+import org.wispcrm.interfaces.ProfileInterface;
+import org.wispcrm.mikrotik.Funciones;
+import org.wispcrm.modelo.clientes.Cliente;
+import org.wispcrm.modelo.clientes.ClienteDTO;
+import org.wispcrm.modelo.clientes.EditarClienteDTO;
+import org.wispcrm.modelo.clientes.EstadoCliente;
+import org.wispcrm.modelo.profiles.Profile;
 import org.wispcrm.services.ClienteServiceImpl;
 import org.wispcrm.services.PlanServiceImpl;
 
@@ -48,6 +54,8 @@ public class ClienteController {
     private final ClienteDao clienteRepository;
     private final InterfaceFacturas daoFacturas;
     private final CacheManager cacheManager;
+    private final ProfileInterface profileInterface;
+    private final Funciones funcionesMikrotik;
 
     @GetMapping(value = "/vercliente")
     public String ver(@RequestParam(name = "id") Integer id,
@@ -85,21 +93,22 @@ public class ClienteController {
         }
     }
 
-
-
     @GetMapping("/form")
     public String crear(Model modelo) {
-        modelo.addAttribute(CLIENTE, new Cliente());
+        modelo.addAttribute(CLIENTE, new EditarClienteDTO());
         modelo.addAttribute("listaplan", planService.findAll());
+        modelo.addAttribute("listaprofile", profileInterface.findAll());
         modelo.addAttribute(TITULO, "Nuevo Cliente");
         return VER_FORM_CLIENTE;
     }
 
     @PostMapping("/save")
-    public String save(@ModelAttribute @Validated Cliente cliente, RedirectAttributes redirectAttributes, SessionStatus status) {
+    public String save(@ModelAttribute @Validated EditarClienteDTO cliente, RedirectAttributes redirectAttributes, SessionStatus status) {
 
         try {
-            clienteService.save(cliente);
+            Cliente clienteTosave = clienteService.toCliente(cliente);
+            clienteService.save(clienteTosave);
+            addPPPoEUserToMikrotik(clienteTosave);
             logClienteOperation(CREAR_CLIENTE, SUCCESS, "Se ha creado un nuevo cliente {}", cliente);
             status.setComplete();
             redirectAttributes.addFlashAttribute(SUCCESS, cliente.getNombres() + " Agregado correctamente")
@@ -115,20 +124,26 @@ public class ClienteController {
            logClienteOperation(CREAR_CLIENTE, "ERROR", "Error al crear cliente: {}", e.getMessage());
            redirectAttributes.addFlashAttribute(ERROR, "Error al guardar el cliente")
                     .addFlashAttribute(CLASE, "danger");
-
         }
         return REDIRECT_LISTAR;
     }
 
+    @Async
+    public void addPPPoEUserToMikrotik(Cliente cliente) throws MikrotikApiException {
+        Profile profile = profileInterface.findOne(cliente.getProfileId());
+        funcionesMikrotik.addPPPoE(profile, cliente);
+    }
+
     @RequestMapping(value = "/editar")
     public String editar(@RequestParam(name = "id") Integer id, Model modelo) {
-        Cliente cliente = clienteService.findById(id);
+        EditarClienteDTO cliente = clienteService.clienteDTOById(id);
         modelo.addAttribute(CLIENTE, cliente);
         if (cliente == null) {
             logClienteOperation("editarCliente", "Fail", "No se encontró el cliente con id {}", null);
             return REDIRECT_LISTAR;
         }
         modelo.addAttribute("listaplan", planService.findAll());
+        modelo.addAttribute("listaprofile", profileInterface.findAll());
         modelo.addAttribute(TITULO, "Actualizar Cliente");
         return VER_FORM_CLIENTE;
     }

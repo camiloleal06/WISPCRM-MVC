@@ -7,10 +7,8 @@ import org.springframework.stereotype.Service;
 import org.wispcrm.daos.InterfaceFacturas;
 import org.wispcrm.excepciones.NotFoundException;
 import org.wispcrm.interfaces.FacturaInterface;
-import org.wispcrm.modelo.Factura;
-import org.wispcrm.modelo.FacturaDto;
-
-import javax.swing.text.StyledEditorKit;
+import org.wispcrm.modelo.facturas.Factura;
+import org.wispcrm.modelo.facturas.FacturaDto;
 
 @Service
 public class FacturaServiceImpl implements FacturaInterface {

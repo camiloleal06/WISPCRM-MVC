@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.wispcrm.daos.ClienteRepository;
-import org.wispcrm.modelo.Cliente;
+import org.wispcrm.modelo.clientes.Cliente;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;

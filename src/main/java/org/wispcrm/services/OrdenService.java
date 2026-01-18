@@ -11,9 +11,9 @@ import org.wispcrm.daos.OrdenDao;
 import org.wispcrm.daos.TipoOrdenDao;
 import org.wispcrm.excepciones.NotFoundException;
 import org.wispcrm.interfaces.OrdenInterface;
-import org.wispcrm.modelo.Operario;
-import org.wispcrm.modelo.Orden;
-import org.wispcrm.modelo.TipoOrden;
+import org.wispcrm.modelo.ordenes.Operario;
+import org.wispcrm.modelo.ordenes.Orden;
+import org.wispcrm.modelo.ordenes.TipoOrden;
 
 import lombok.AllArgsConstructor;
 

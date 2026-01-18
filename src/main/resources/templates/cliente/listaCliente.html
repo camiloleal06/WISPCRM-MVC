@@ -103,31 +103,31 @@
 												<td th:text="${clientes.valor}"></td>
 												<td>
 													<th:block
-														th:if="${clientes.estado == T(org.wispcrm.modelo.EstadoCliente).ACTIVO}">
+														th:if="${clientes.estado == T(org.wispcrm.modelo.clientes.EstadoCliente).ACTIVO}">
 														<span class="badge bg-success">Activo</span>
 													</th:block>
 
 													<th:block
-														th:if="${clientes.estado == T(org.wispcrm.modelo.EstadoCliente).INACTIVO}">
+														th:if="${clientes.estado == T(org.wispcrm.modelo.clientes.EstadoCliente).INACTIVO}">
 														<span class="badge bg-warning">Inactivo</span>
 													</th:block>
 
 													<th:block
-														th:if="${clientes.estado == T(org.wispcrm.modelo.EstadoCliente).SUSPENDIDO}">
+														th:if="${clientes.estado == T(org.wispcrm.modelo.clientes.EstadoCliente).SUSPENDIDO}">
 														<span class="badge bg-danger">Suspendido</span>
 													</th:block>
 												</td>
 
 												<td>
 													<th:block
-														th:if="${clientes.estado == T(org.wispcrm.modelo.EstadoCliente).ACTIVO}">
+														th:if="${clientes.estado == T(org.wispcrm.modelo.clientes.EstadoCliente).ACTIVO}">
 														<a th:href="@{/vercliente(id=${clientes.id})}" class="btn btn-info btn-rounded btn-icon 
 														data-toggle=" title="Detalle cliente">
 														<em class=" fas fa-eye"></em></a>
 													</th:block>
 
 													<th:block
-														th:if="${clientes.estado == T(org.wispcrm.modelo.EstadoCliente).ACTIVO}">
+														th:if="${clientes.estado == T(org.wispcrm.modelo.clientes.EstadoCliente).ACTIVO}">
 														<a th:href="@{'facturar/' + ${clientes.id}}" class="btn btn-success btn-rounded btn-icon  
 														data-toggle=" title="Facturar">
 														<em class=" fas fa-file-invoice"></em>
@@ -139,7 +139,7 @@
 														<em class=" fas fa-user-edit"></em></a>
 
 													<th:block
-														th:if="${clientes.estado == T(org.wispcrm.modelo.EstadoCliente).ACTIVO || clientes.estado == T(org.wispcrm.modelo.EstadoCliente).SUSPENDIDO}">
+														th:if="${clientes.estado == T(org.wispcrm.modelo.clientes.EstadoCliente).ACTIVO || clientes.estado == T(org.wispcrm.modelo.clientes.EstadoCliente).SUSPENDIDO}">
 														<a th:onclick="eliminarCliente([[${clientes.id}]])" class="btn btn-danger btn-rounded btn-icon
 														data-toggle=" title="Eliminar cliente">
 														<em class=" fas fa-user-minus"></em>
@@ -148,7 +148,7 @@
 
 
 													<th:block
-														th:if="${clientes.estado == T(org.wispcrm.modelo.EstadoCliente).INACTIVO}">
+														th:if="${clientes.estado == T(org.wispcrm.modelo.clientes.EstadoCliente).INACTIVO}">
 														<a th:onclick="reactivarCliente([[${clientes.id}]])" class="btn btn-success btn-rounded btn-icon
 														data-toggle=" title="Reactivar cliente">
 														<em class=" fas fa-user-plus"></em>

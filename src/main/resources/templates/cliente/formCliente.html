@@ -127,17 +127,68 @@
 										</div>
 										<div class="form-group col-md-4">
 											<label>Plan de Internet</label>
-											<select th:field="*{planes}" class="form-control">
+										<!--	<select th:field="*{planes}" class="form-control">
 												<option  th:selected="${planes}"
 														 th:each="pl:${listaplan}" th:value="${pl.id}"
 														 th:text="${pl.nombre}"></option>
+											</select>-->
+											<select th:field="*{planesId}" class="form-control">
+												<option
+														th:selected="${planesId}"
+														th:each="p : ${listaplan}"
+														th:value="${p.id}"
+														th:text="${p.nombre}">
+												</option>
+											</select>
+										</div>
+											</div>
+
+									<div class="form-row col-md-12">
+										<div class="form-group col-md-3">
+											<label for="ipAddress">Dirección IP</label>
+											<input type="text"
+												   th:field="*{ipAddress}"
+												   class="form-control" id="ipAddress">
+
+											<span class="clase" th:if="${#fields.hasErrors('telefono')}"
+												  th:errors="*{ipAddress}"></span>
+										</div>
+
+										<div class="form-group col-md-3">
+											<label for="pppoeUser">Usuario PPPoE</label>
+											<input type="text"
+												   th:field="*{pppoeUser}"
+												   class="form-control" id="pppoeUser">
+
+											<span class="clase" th:if="${#fields.hasErrors('pppoeUser')}"
+												  th:errors="*{pppoeUser}"></span>
+										</div>
+
+										<div class="form-group col-md-3">
+											<label for="pppoePass">Clave PPPoE</label>
+											<input type="text"
+												   th:field="*{pppoePass}"
+												   class="form-control" id="pppoePass">
+
+											<span class="clase" th:if="${#fields.hasErrors('pppoePass')}"
+												  th:errors="*{pppoePass}"></span>
+										</div>
+
+										<div class="form-group col-md-3">
+											<label>Profile PPPoE</label>
+											<select th:field="*{profileId}" class="form-control">
+												<option  th:selected="${profileId}"
+														 th:each="pl:${listaprofile}" th:value="${pl.id}"
+														 th:text="${pl.name}"></option>
 											</select>
 										</div>
 
 									</div>
+
 									<div class="box-footer col-md-12">
 										<button class="btn btn-primary" type="submit">Guardar</button>
 									</div>
+
 								</form>
 							</div>
 							<!-- /.card -->

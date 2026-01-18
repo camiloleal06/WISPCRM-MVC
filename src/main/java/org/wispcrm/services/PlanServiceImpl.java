@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.wispcrm.daos.PlanDao;
 import org.wispcrm.excepciones.NotFoundException;
 import org.wispcrm.interfaces.PlanInterface;
-import org.wispcrm.modelo.Plan;
+import org.wispcrm.modelo.planes.Plan;
 
 @Service
 public class PlanServiceImpl implements PlanInterface {

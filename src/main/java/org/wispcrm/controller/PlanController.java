@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.wispcrm.interfaces.PlanInterface;
-import org.wispcrm.modelo.Plan;
+import org.wispcrm.modelo.planes.Plan;
 
 @Controller
 public class PlanController {

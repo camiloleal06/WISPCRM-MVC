@@ -5,10 +5,10 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-import org.wispcrm.modelo.Cliente;
-import org.wispcrm.modelo.Factura;
-import org.wispcrm.modelo.FacturaDto;
-import org.wispcrm.modelo.ResumenFacturasDTO;
+import org.wispcrm.modelo.clientes.Cliente;
+import org.wispcrm.modelo.facturas.Factura;
+import org.wispcrm.modelo.facturas.FacturaDto;
+import org.wispcrm.modelo.facturas.ResumenFacturasDTO;
 
 @Repository
 public interface InterfaceFacturas extends CrudRepository<Factura, Integer> {
@@ -17,7 +17,7 @@ public interface InterfaceFacturas extends CrudRepository<Factura, Integer> {
 
     List<Factura> findByCliente(Cliente cliente);
 
-    @Query("SELECT new org.wispcrm.modelo.FacturaDto(f.id, CONCAT(c.nombres,' ',c.apellidos) as nombres, "
+    @Query("SELECT new org.wispcrm.modelo.facturas.FacturaDto(f.id, CONCAT(c.nombres,' ',c.apellidos) as nombres, "
             + "c.telefono,  f.valor, c.diapago, DATEDIFF(CURRENT_TIMESTAMP() , f.fechapago) as mora) "
             + " FROM Factura f JOIN f.cliente c WHERE f.estado=true ")
     List<FacturaDto> listadoFacturasPendientes();
@@ -43,7 +43,7 @@ public interface InterfaceFacturas extends CrudRepository<Factura, Integer> {
     @Query(value = "SELECT count(*) FROM Factura WHERE estado=false and periodo=MONTH(CURRENT_TIMESTAMP)")
     int existFacturaCreada();
 
-    @Query("SELECT new org.wispcrm.modelo.ResumenFacturasDTO(" +
+    @Query("SELECT new org.wispcrm.modelo.facturas.ResumenFacturasDTO(" +
             "COUNT(*), " +
             "SUM(valor)) " +
             "FROM Factura " +

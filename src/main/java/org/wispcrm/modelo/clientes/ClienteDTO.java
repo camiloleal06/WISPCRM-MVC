@@ -1,4 +1,4 @@
-package org.wispcrm.modelo;
+package org.wispcrm.modelo.clientes;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

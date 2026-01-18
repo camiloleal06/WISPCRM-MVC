@@ -1,6 +1,5 @@
-package org.wispcrm.modelo;
+package org.wispcrm.modelo.clientes;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -23,6 +22,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.wispcrm.modelo.planes.Plan;
 
 @Entity
 @Table(name = "clientes")
@@ -32,9 +32,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 @Builder
-public class Cliente implements Serializable {
-    private static final long serialVersionUID = 1L;
-
+public class Cliente {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -45,19 +43,20 @@ public class Cliente implements Serializable {
     private String email;
     private String telefono;
     private String direccion;
-    private String ipaddres;
+    private String ipAddress;
+    private String pppoeUser;
+    private String pppoePass;
     private EstadoCliente estado = EstadoCliente.ACTIVO;
     @Column(name = "create_at")
     @Temporal(TemporalType.DATE)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date createAt;
-
     @ManyToOne(fetch = FetchType.LAZY)
     private Plan planes;
-
+    @Column(name = "profile_id")
+    private Integer profileId;
     @PrePersist
     public void prePersist() {
         createAt = new Date();
     }
-
 }

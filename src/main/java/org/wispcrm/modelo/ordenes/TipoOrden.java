@@ -1,4 +1,4 @@
-package org.wispcrm.modelo;
+package org.wispcrm.modelo.ordenes;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

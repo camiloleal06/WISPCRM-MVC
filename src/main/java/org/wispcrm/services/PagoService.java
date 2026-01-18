@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.wispcrm.daos.InterfacePagos;
 import org.wispcrm.interfaces.InterfacePagoService;
-import org.wispcrm.modelo.Pago;
+import org.wispcrm.modelo.pagos.Pago;
 
 @Service
 public class PagoService implements InterfacePagoService {

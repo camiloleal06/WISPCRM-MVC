@@ -1,4 +1,4 @@
-package org.wispcrm.modelo;
+package org.wispcrm.modelo.clientes;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,13 +10,17 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EditarClienteDTO {
-    private int id;
+    private Integer id;
     private String identificacion;
     private String nombres;
     private String apellidos;
     private String email;
-    private String direccion;
     private String telefono;
-    private int plan;
-    private int diaPago;
+    private int diapago;
+    private String direccion;
+    private String ipAddress;
+    private String pppoeUser;
+    private String pppoePass;
+    private Integer planesId;
+    private Integer profileId;
 }

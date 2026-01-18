@@ -1,13 +1,18 @@
 package org.wispcrm.mikrotik;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+@Getter
+@Service
+@NoArgsConstructor
 public class ConfigMikrotik {
-
-    public static final String HOST = "192.168.222.6";
-    public static final String USERNAME = "api";
-    public static final String PASSWORD = "api";
-
-    private ConfigMikrotik() {
-        super();
-    }
-
+    @Value("${mikrotik.host}")
+    private String host;
+    @Value("${mikrotik.username}")
+    private String username;
+    @Value("${mikrotik.password}")
+    private String password;
 }

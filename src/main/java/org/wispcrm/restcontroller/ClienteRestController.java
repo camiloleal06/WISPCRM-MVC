@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.wispcrm.daos.InterfaceFacturas;
 import org.wispcrm.daos.InterfacePagos;
-import org.wispcrm.modelo.PagoDTO;
-import org.wispcrm.modelo.ResumenFacturasDTO;
+import org.wispcrm.modelo.pagos.PagoDTO;
+import org.wispcrm.modelo.facturas.ResumenFacturasDTO;
 import org.wispcrm.services.ClienteServiceImpl;
 
 @RestController

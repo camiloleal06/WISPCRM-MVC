@@ -1,4 +1,4 @@
-package org.wispcrm.modelo;
+package org.wispcrm.modelo.facturas;
 
 import java.util.Date;
 

@@ -1,7 +1,7 @@
 package org.wispcrm.interfaces;
 
 import java.util.List;
-import org.wispcrm.modelo.Plan;
+import org.wispcrm.modelo.planes.Plan;
 
 public interface PlanInterface {
 	

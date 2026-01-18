@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.wispcrm.daos.InterfaceFacturas;
-import org.wispcrm.modelo.FacturaDto;
+import org.wispcrm.modelo.facturas.FacturaDto;
 import org.wispcrm.services.WhatsappMessageService;
 
 @Slf4j

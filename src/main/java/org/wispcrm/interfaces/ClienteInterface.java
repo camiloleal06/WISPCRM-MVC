@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.wispcrm.modelo.Cliente;
-import org.wispcrm.modelo.ClienteDTO;
-import org.wispcrm.modelo.Factura;
+import org.wispcrm.modelo.clientes.Cliente;
+import org.wispcrm.modelo.clientes.ClienteDTO;
+import org.wispcrm.modelo.facturas.Factura;
 
 public interface ClienteInterface {
 

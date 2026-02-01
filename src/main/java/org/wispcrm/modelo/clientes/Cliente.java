@@ -51,7 +51,7 @@ public class Cliente {
     @Temporal(TemporalType.DATE)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date createAt;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private Plan planes;
     @Column(name = "profile_id")
     private Integer profileId;

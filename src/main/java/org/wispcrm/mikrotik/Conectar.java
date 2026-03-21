@@ -17,13 +17,20 @@ import org.springframework.beans.factory.annotation.Value;
 abstract class Conectar {
 
     private final ConfigMikrotik configMikrotik;
+    protected ApiConnection con;
 
-    protected void connect() throws MikrotikApiException {
+    protected boolean connect() throws MikrotikApiException {
         log.info("Connecting to {} as {}", configMikrotik.getHost(), configMikrotik.getUsername());
         con = ApiConnection.connect(SocketFactory.getDefault(), configMikrotik.getHost(),
                 ApiConnection.DEFAULT_PORT, 10000);
         con.login(configMikrotik.getUsername(), configMikrotik.getPassword());
-        log.info("Connected to Mikrotik");
+        if (con.isConnected()) {
+            log.info("Connected to Mikrotik");
+        }
+        else {
+            log.info("Error Connecting to Mikrotik");
+        }
+        return con.isConnected();
     }
 
     protected void disconnect() throws ApiConnectionException {
@@ -31,5 +38,4 @@ abstract class Conectar {
         con.close();
     }
 
-    protected ApiConnection con;
 }

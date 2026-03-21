@@ -281,7 +281,7 @@ public class FacturaController {
         factura.setNotificacion(factura.getNotificacion() + 1);
         facturaDao.save(factura);
         this.sendWhatsAppMessageNotificacionDePago(factura);
-        funciones.addlistsuspendidos("192.168.88.1", factura.getCliente().getNombres());
+       // funciones.addlistsuspendidos("192.168.88.1", factura.getCliente().getNombres());
         flash.addFlashAttribute(INFO,
                 "El mensaje ha sido enviado a : " + telefono);
         status.setComplete();

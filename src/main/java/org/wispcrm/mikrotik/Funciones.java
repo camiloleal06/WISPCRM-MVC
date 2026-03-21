@@ -22,24 +22,58 @@ public class Funciones extends Conectar {
         con.execute("/ip/firewall/address-list/add address=" + ip + " list=Morosos comment=" + comentario);
         disconnect();
     }
-
-    public void addPPPoE(Profile profile, Cliente cliente) throws MikrotikApiException {
+/*
+    public void addPPPoE(Profile profile, Cliente cliente)
+            throws MikrotikApiException {
 
         if (!connect()) {
             log.info("No hay conexión con mikrotik");
         }
-            connect();
-            List<Map<String, String>> result = con.execute(
-                    "/ppp/secret/print where name=\"" + cliente.getPppoeUser() + "\"");
+        connect();
+        List<Map<String, String>> result = con.execute(
+                "/ppp/secret/print where name=\"" + cliente.getPppoeUser() + "\"");
 
-            boolean existe = result != null && !result.isEmpty();
+        boolean existe = result != null && !result.isEmpty();
 
-            if (!existe) {
-                con.execute(
-                        "/ppp/secret/add name=" + cliente.getPppoeUser() + " password=" + cliente.getPppoePass() + " profile=" + profile.getName() + " remote-address=" + cliente.getIpAddress() + " service=pppoe");
-                log.info("Se ha agregado un nuevo cliente PPPoE: {}",
-                        cliente.getPppoeUser());
-            }
-            disconnect();
+        if (!existe) {
+            con.execute(
+                    "/ppp/secret/add name=" + cliente.getPppoeUser() + " password=" + cliente.getPppoePass() +
+                     " profile=" + profile.getName() + " remote-address=" + cliente.getIpAddress() + " service=pppoe");
+            log.info("Se ha agregado un nuevo cliente PPPoE: {}",
+                    cliente.getPppoeUser());
         }
+        disconnect();
+    }*/
+public void addPPPoE(Profile profile, Cliente cliente) throws MikrotikApiException {
+
+    if (!connect()) {
+        log.error("No hay conexión con Mikrotik");
+        return;
+    }
+
+    try {
+        String username = cliente.getPppoeUser();
+
+        List<Map<String, String>> result = con.execute(
+                "/ppp/secret/print where name=\"" + cliente.getPppoeUser() + "\"");
+
+        boolean existe = result != null && !result.isEmpty();
+
+        if (!existe) {
+            con.execute(
+                    "/ppp/secret/add name=" + cliente.getPppoeUser() + " password=" + cliente.getPppoePass() +
+                            " profile=" + profile.getName() + " remote-address=" + cliente.getIpAddress() + " service=pppoe");
+
+            log.info("Se ha agregado un nuevo cliente PPPoE: {}", username);
+        } else {
+            log.info("El cliente PPPoE ya existe: {}", username);
+        }
+
+    } catch (Exception e) {
+        log.error("Error creando PPPoE para el cliente: {}", cliente.getPppoeUser(), e);
+        throw e;
+    } finally {
+        disconnect();
+    }
+}
 }

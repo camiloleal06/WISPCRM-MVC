@@ -359,8 +359,10 @@ public class FacturaController {
         factura.setNotificacion(ConstantMensaje.ZERO_INT);
         factura.setPeriodo(LocalDate.now().getMonthValue());
         Factura facturaSend = facturaDao.save(factura);
-       // sendWhatsAppMessageNuevaFacturaGenerada(facturaSend);
         sendWhatsAppMessageNuevaFacturaGeneradaTemplate(facturaSend);
+        whatsappMessageService.sendSimpleMessageToGroupWasApiSender(
+                WHATSAPP_GROUP_ID, "Se han generado la factura del cliente : " + factura.getCliente().getNombres() + " " +
+                        factura.getCliente().getApellidos() + " con id : " + factura.getId() + " correctamente ");
         return factura;
     }
 

@@ -45,6 +45,8 @@ public class WhatsappMessageService {
     }
 
     // -------------------- MENSAJE A GRUPO --------------------
+    //
+    @Async("threadPoolTaskExecutor")
     public void sendSimpleMessageToGroupWasApiSender(String groupId, String msg) {
         Map<String, String> payload = new HashMap<>();
         payload.put("to", groupId);

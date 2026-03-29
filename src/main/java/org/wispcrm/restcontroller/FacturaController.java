@@ -139,6 +139,9 @@ public class FacturaController {
            createFacturasEntreDiaInicialDiaFinal(listaClientes);
         }
 
+        whatsappMessageService.sendSimpleMessageToGroupWasApiSender(
+                WHATSAPP_GROUP_ID, "Se han generado "+listaClientes.size() +" facturas para su respectivo cobro ");
+
         flash.addFlashAttribute(INFO,
                 "Se han generado : " + listaClientes.size() + " Facturas con exito ");
 
@@ -281,7 +284,6 @@ public class FacturaController {
         factura.setNotificacion(factura.getNotificacion() + 1);
         facturaDao.save(factura);
         this.sendWhatsAppMessageNotificacionDePago(factura);
-       // funciones.addlistsuspendidos("192.168.88.1", factura.getCliente().getNombres());
         flash.addFlashAttribute(INFO,
                 "El mensaje ha sido enviado a : " + telefono);
         status.setComplete();
@@ -456,11 +458,9 @@ public class FacturaController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String primerDiaFormateado = primerDiaDelMes.format(formatter);
         String ultimoDiaFormateado = ultimoDiaDelMes.format(formatter);
-
-        List<PagoDTO> pago = pagosD.lista();
         Date startDate = getDateAsUtilDate(primerDiaFormateado);
         Date endDate = getDateAsUtilDate(ultimoDiaFormateado);
-
+        List<PagoDTO> pago = pagosD.lista();
         modelo.addAttribute("listapagos",
                 listaPagosByDates(pago, startDate, endDate).collect(
                         Collectors.toList()));

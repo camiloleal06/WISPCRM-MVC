@@ -9,11 +9,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.wispcrm.daos.ClienteDao;
 import org.wispcrm.daos.InterfaceFacturas;
 import org.wispcrm.daos.InterfacePagos;
+import org.wispcrm.modelo.pagos.PagoDTO;
 import org.wispcrm.utils.Util;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Stream;
 
 import static org.wispcrm.utils.Util.currentUserName;
 
@@ -38,7 +46,13 @@ public class HomeController {
                 facturaDao::totalCantidadFacturasMes);
 
         CompletableFuture<Long> pagadasMesFuture = CompletableFuture.supplyAsync(
-                facturaDao::totalFacturasPagadasMes);
+                () -> {
+                    try {
+                        return listaPagosByDates();
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
 
         CompletableFuture<Long> pendienteHistoricoFuture = CompletableFuture.supplyAsync(
                 facturaDao::totalFacturasPendientesHistorico);
@@ -73,4 +87,26 @@ public class HomeController {
         return "home";
     }
 
-  }
+    private Long listaPagosByDates() throws ParseException {
+        LocalDate fechaActual = LocalDate.now();
+        LocalDate primerDiaDelMes = fechaActual.withDayOfMonth(1);
+        LocalDate ultimoDiaDelMes = fechaActual.withDayOfMonth(
+                fechaActual.lengthOfMonth());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String primerDiaFormateado = primerDiaDelMes.format(formatter);
+        String ultimoDiaFormateado = ultimoDiaDelMes.format(formatter);
+        Date startDate = getDateAsUtilDate(primerDiaFormateado);
+        Date endDate = getDateAsUtilDate(ultimoDiaFormateado);
+        List<PagoDTO> pago = pagosDao.lista();
+
+        return pago.stream()
+                .filter(p -> !p.getFechapago().before(startDate)
+                        && !p.getFechapago().after(endDate))
+                .mapToLong(p -> (long) p.getPago())
+                .sum();
+    }
+    public Date getDateAsUtilDate(String fecha) throws ParseException {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        return formatter.parse(fecha);
+    }
+}

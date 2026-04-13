@@ -360,9 +360,9 @@ public class FacturaController {
         factura.setPeriodo(LocalDate.now().getMonthValue());
         Factura facturaSend = facturaDao.save(factura);
         sendWhatsAppMessageNuevaFacturaGeneradaTemplate(facturaSend);
-        whatsappMessageService.sendSimpleMessageToGroupWasApiSender(
+    /*    whatsappMessageService.sendSimpleMessageToGroupWasApiSender(
                 WHATSAPP_GROUP_ID, "Se han generado la factura del cliente : " + factura.getCliente().getNombres() + " " +
-                        factura.getCliente().getApellidos() + " con id : " + factura.getId() + " correctamente ");
+                        factura.getCliente().getApellidos() + " con id : " + factura.getId() + " correctamente ");*/
         return factura;
     }
 

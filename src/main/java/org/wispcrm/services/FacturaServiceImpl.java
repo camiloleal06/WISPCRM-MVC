@@ -68,7 +68,11 @@ public class FacturaServiceImpl implements FacturaInterface {
     }
 
     public boolean existeFacturaPeriodo(){
-        return facturaDao.existFacturaCreada() > 0 ? Boolean.TRUE : Boolean.FALSE;
+        return facturaDao.existFacturaCreada() > 0;
+    }
+
+    public boolean clienteYaFacturadoEsteMes(int clienteId) {
+        return facturaDao.countFacturaClienteMesActual(clienteId) > 0;
     }
 
 }

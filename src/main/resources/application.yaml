@@ -3,7 +3,7 @@ invoice:
   logo:
     path: "${INVOICE_LOGO_PATH:/jasper/images/LOGO.png}"
   template:
-    path: "${INVOICE_TEMPLATE_PATH:/jasper/Facturas.jrxml}"
+    path: "${INVOICE_TEMPLATE_PATH:/jasper/Factura.jrxml}"
 recibo:
   template:
     path: "${RECIBO_TEMPLATE_PATH:/jasper/Recibos.jrxml}"
@@ -30,9 +30,9 @@ spring:
     hikari:
       connection-test-query: "SELECT 1 FROM DUAL"
       connection-timeout: 20000
-      maximum-pool-size: 50
+      maximum-pool-size: 20
       max-lifetime: 1800000
-      minimum-idle: 20
+      minimum-idle: 5
       validation-timeout: 3000
       idle-timeout: 60000
   jpa:
@@ -41,7 +41,7 @@ spring:
         dialect: org.hibernate.dialect.MySQL5InnoDBDialect
     hibernate:
       ddl-auto: none    # Changed for production safety
-    open-in-view: true # Performance improvement
+    open-in-view: false
     show-sql: false     # Disable SQL logging in production
   mail:
     host: smtp.gmail.com
@@ -74,6 +74,7 @@ server:
 sysred :
   notification :
     cron : "${CRON_SCHEDULED:0 0 9 * * 2,6}"
+    suspensionNotify : ${SUSPENSION_NOTIFY:true}
 mikrotik :
   host: "${MIKROTIK_HOST:192.168.222.2}"
   username: "${MIKROTIK_USER:api}"

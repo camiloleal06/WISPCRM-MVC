@@ -19,6 +19,18 @@ public interface ClienteDao extends JpaRepository<Cliente, Integer> {
     @Query(value = "SELECT count(*) FROM Cliente WHERE estado=0")
     public Long totalClientesActivos();
 
+    @Query(value = "SELECT count(*) FROM Cliente WHERE estado=1")
+    Long totalClientesInactivos();
+
+    @Query(value = "SELECT count(*) FROM Cliente WHERE estado=2")
+    Long totalClientesSuspendidos();
+
+    @Query(value = "SELECT count(*) FROM Cliente WHERE MONTH(create_at)=MONTH(CURRENT_TIMESTAMP) AND YEAR(create_at)=YEAR(CURRENT_TIMESTAMP)")
+    Long clientesNuevosMes();
+
+    @Query(value = "SELECT COALESCE(SUM(p.precio), 0) FROM Cliente c JOIN c.planes p WHERE c.estado = 0")
+    Long ingresoEsperado();
+
     Optional<Cliente> findFirstClienteByIdentificacion(String identificacion);
 
     Optional<Cliente> findFirstClienteByEmail(String email);
@@ -47,8 +59,5 @@ public interface ClienteDao extends JpaRepository<Cliente, Integer> {
     @Query("SELECT new org.wispcrm.modelo.clientes.ClienteDTO(c.id, c.identificacion, CONCAT(c.nombres,' ',c.apellidos), "
             + "c.email , c.telefono, p.precio, c.estado) " + " FROM Cliente c JOIN c.planes p ")
     Page<ClienteDTO> listaPaginada(Pageable pageable);
-
-    @Query("SELECT c FROM Cliente c JOIN FETCH c.planes")
-    List<Cliente> findAllWithPlan();
 
 }

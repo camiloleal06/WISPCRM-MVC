@@ -2,11 +2,10 @@
 
     <!-- Rolling File Appender en JSON -->
     <appender name="FILE_JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/var/log/springboot/app.json</file>
+        <file>./logs/app.json</file>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <!-- Archivos rotados por fecha y tamaño -->
-            <fileNamePattern>/var/log/springboot/archived/sysred.%d{yyyy-MM-dd}.%i.json</fileNamePattern>
+            <fileNamePattern>./logs/archived/sysred.%d{yyyy-MM-dd}.%i.json</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
             <maxHistory>30</maxHistory>
             <totalSizeCap>3GB</totalSizeCap>

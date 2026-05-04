@@ -15,7 +15,6 @@ import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.google.api.client.http.HttpMethods.POST;
 
 @Slf4j
 @Service
@@ -32,10 +31,11 @@ public class WhatsappMessageService {
     @Value("${message.tokenBearerWhatsappApiSender}")
     private String tokenBearerWhatsappApiSender;
 
-    private HttpClient client = HttpClient.newHttpClient();
-    private ObjectMapper mapper = new ObjectMapper();
+    private static final HttpClient client = HttpClient.newHttpClient();
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     // -------------------- MENSAJE SIMPLE --------------------
+    @Async("threadPoolTaskExecutor")
     public void sendSimpleMessageWasenderapi(String clientNumber, String msg) {
         Map<String, String> payload = new HashMap<>();
         payload.put("to", AREA_CODE + clientNumber);
@@ -45,6 +45,7 @@ public class WhatsappMessageService {
     }
 
     // -------------------- MENSAJE A GRUPO --------------------
+    @Async("threadPoolTaskExecutor")
     public void sendSimpleMessageToGroupWasApiSender(String groupId, String msg) {
         Map<String, String> payload = new HashMap<>();
         payload.put("to", groupId);
@@ -54,6 +55,7 @@ public class WhatsappMessageService {
     }
 
     // -------------------- DOCUMENTO + MENSAJE --------------------
+    @Async("threadPoolTaskExecutor")
     public void sendDocumentAndMessageWasenderapi(String clientNumber, String msg, String pathDocument, String fileName) {
         Map<String, String> payload = new HashMap<>();
         payload.put("to", AREA_CODE + clientNumber);
@@ -83,7 +85,7 @@ public class WhatsappMessageService {
                     .uri(URI.create(uriWhatsappApiSender))
                     .header(AUTHORIZATION, tokenBearerWhatsappApiSender)
                     .header(TYPE, APPLICATION_JSON)
-                    .method(POST, HttpRequest.BodyPublishers.ofString(jsonPayload))
+                    .method("POST", HttpRequest.BodyPublishers.ofString(jsonPayload))
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());

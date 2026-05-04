@@ -78,16 +78,21 @@ clientes.email,
 clientes.telefono,
 clientes.direccion,
 planes.nombre,
-planes.precio AS PRECIO_PLAN ,
+planes.nombre AS plan,
+planes.precio,
+planes.precio AS PRECIO_PLAN,
 facturas.id AS CODIGO_FACTURA,
 facturas.fechapago,
-facturas.fechavencimiento
+facturas.fechavencimiento,
+facturas.fechavencimiento AS fechacorte
 FROM
 facturas,
 clientes,
 planes
 WHERE
 clientes.id=facturas.cliente_id
+AND
+planes.id=clientes.planes_id
 AND
 facturas.id= $P{factura_id}]]>
 	</queryString>
@@ -120,6 +125,9 @@ facturas.id= $P{factura_id}]]>
 	<field name="fechavencimiento" class="java.sql.Timestamp">
 		<fieldDescription><![CDATA[]]></fieldDescription>
 	</field>
+	<field name="plan" class="java.lang.String"/>
+	<field name="precio" class="java.lang.Double"/>
+	<field name="fechacorte" class="java.sql.Timestamp"/>
 	<group name="Gruppo1">
 		<groupExpression><![CDATA[(int)($V{REPORT_COUNT}/15)]]></groupExpression>
 		<groupHeader>

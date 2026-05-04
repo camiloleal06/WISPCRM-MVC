@@ -51,28 +51,35 @@ public class FacturaReportService {
     @Transactional
     public JasperPrint descargarPdfFile(Integer id) throws JRException, SQLException {
         InputStream stream = this.getClass().getResourceAsStream(invoiceTemplate);
+        if (stream == null) throw new JRException("Template no encontrado: " + invoiceTemplate);
         JasperReport report = JasperCompileManager.compileReport(stream);
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(FACTURA_ID, id);
         DataSource dataSource = jdbcTemplate.getDataSource();
         validateDatasource(dataSource);
-        return JasperFillManager.fillReport(report, parameters, dataSource.getConnection());
+        try (Connection connection = dataSource.getConnection()) {
+            return JasperFillManager.fillReport(report, parameters, connection);
+        }
     }
 
     @Transactional
     public JasperPrint ordenDeServicioPdfFile(Integer id) throws JRException, SQLException {
         InputStream stream = this.getClass().getResourceAsStream(ordenTemplate);
+        if (stream == null) throw new JRException("Template no encontrado: " + ordenTemplate);
         JasperReport report = JasperCompileManager.compileReport(stream);
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(ORDER_ID, id);
         DataSource dataSource = jdbcTemplate.getDataSource();
         validateDatasource(dataSource);
-        return JasperFillManager.fillReport(report, parameters, dataSource.getConnection());
+        try (Connection connection = dataSource.getConnection()) {
+            return JasperFillManager.fillReport(report, parameters, connection);
+        }
     }
 
     @Transactional
     public JasperPrint descargarPagoFile(Integer id) throws JRException {
         InputStream stream = this.getClass().getResourceAsStream(reciboTemplate);
+        if (stream == null) throw new JRException("Template no encontrado: " + reciboTemplate);
         JasperReport report = JasperCompileManager.compileReport(stream);
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(FACTURA_ID, id);
@@ -98,13 +105,10 @@ public class FacturaReportService {
         pagoReport(id, cliente);
     }
 
-   public void ordenPdfReport(Integer id, String cliente, String parametro) throws JRException {
-        report(id, cliente, parametro);
-    }
-
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void report(Integer id, String cliente) throws JRException {
         final InputStream stream = this.getClass().getResourceAsStream(invoiceTemplate);
+        if (stream == null) throw new JRException("Template no encontrado: " + invoiceTemplate);
         JasperReport report = JasperCompileManager.compileReport(stream);
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(FACTURA_ID, id);
@@ -128,6 +132,7 @@ public class FacturaReportService {
     @Transactional
     public void pagoReport(Integer id, String cliente) throws JRException {
         final InputStream stream = this.getClass().getResourceAsStream(reciboTemplate);
+        if (stream == null) throw new JRException("Template no encontrado: " + reciboTemplate);
         JasperReport report = JasperCompileManager.compileReport(stream);
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(FACTURA_ID, id);
@@ -141,19 +146,4 @@ public class FacturaReportService {
         }
     }
 
-    @Transactional
-    public void report(Integer id, String cliente, String parametro) throws JRException {
-        final InputStream stream = this.getClass().getResourceAsStream(ordenTemplate);
-        JasperReport report = JasperCompileManager.compileReport(stream);
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put(parametro, id);
-        DataSource dataSource = jdbcTemplate.getDataSource();
-        try (Connection connection = dataSource.getConnection()) {
-            JasperPrint print = JasperFillManager.fillReport(report, parameters, connection);
-            JasperExportManager.exportReportToPdfFile(print, facturaPath + cliente);
-                }
-        catch (SQLException e) {
-            log.error(ERROR_GENERANDO_REPORTE, e);
-        }
-    }
 }

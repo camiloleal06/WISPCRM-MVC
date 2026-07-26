@@ -1,0 +1,6 @@
+spring:
+  profiles: dev
+mikrotik:
+  host: "192.168.40.18"
+  username: "api"
+  password: "api"

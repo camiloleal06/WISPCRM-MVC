@@ -16,4 +16,14 @@ public class FacturaDto {
     private double valorFactura;
     private int diapago;
     private int mora;
+    private int clienteId;
+
+    public FacturaDto(int idFactura, String nombres, String telefonoCliente, double valorFactura, int diapago, int mora) {
+        this.idFactura = idFactura;
+        this.nombres = nombres;
+        this.telefonoCliente = telefonoCliente;
+        this.valorFactura = valorFactura;
+        this.diapago = diapago;
+        this.mora = mora;
+    }
 }

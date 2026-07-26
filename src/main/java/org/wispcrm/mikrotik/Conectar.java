@@ -19,23 +19,32 @@ abstract class Conectar {
     private final ConfigMikrotik configMikrotik;
     protected ApiConnection con;
 
+    protected String getConfigHost() {
+        return configMikrotik.getHost();
+    }
+
     protected boolean connect() throws MikrotikApiException {
-        log.info("Connecting to {} as {}", configMikrotik.getHost(), configMikrotik.getUsername());
-        con = ApiConnection.connect(SocketFactory.getDefault(), configMikrotik.getHost(),
-                ApiConnection.DEFAULT_PORT, 10000);
-        con.login(configMikrotik.getUsername(), configMikrotik.getPassword());
-        if (con.isConnected()) {
-            log.info("Connected to Mikrotik");
+        String host = configMikrotik.getHost();
+        String user = configMikrotik.getUsername();
+        log.info("[MIKROTIK] Conectando a {}:{} como {}", host, ApiConnection.DEFAULT_PORT, user);
+        try {
+            con = ApiConnection.connect(SocketFactory.getDefault(), host, ApiConnection.DEFAULT_PORT, 10000);
+            con.login(user, configMikrotik.getPassword());
+        } catch (MikrotikApiException e) {
+            log.error("[MIKROTIK] Conexion fallida a {} | Error: {}", host, e.getMessage());
+            throw e;
         }
-        else {
-            log.info("Error Connecting to Mikrotik");
+        if (con.isConnected()) {
+            log.info("[MIKROTIK] Conectado exitosamente a {}", host);
+        } else {
+            log.error("[MIKROTIK] No se pudo conectar a {}", host);
         }
         return con.isConnected();
     }
 
     protected void disconnect() throws ApiConnectionException {
-        log.info("Closing connection");
         con.close();
+        log.info("[MIKROTIK] Desconectado de {}", configMikrotik.getHost());
     }
 
 }

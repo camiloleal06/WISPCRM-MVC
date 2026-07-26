@@ -9,67 +9,69 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.User.UserBuilder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.wispcrm.modelo.AppUser;
 import org.wispcrm.utils.LoginSuccessHandler;
+
+import javax.servlet.http.HttpServletResponse;
 
 @Configuration
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
-    private static final String USER = "USER";
-    private static final String ADMIN = "ADMIN";
+
     @Autowired
     private LoginSuccessHandler successHandler;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                .antMatchers("/build/", "/dist/**", "/plugins/**", "/docs/**","/css/**")
-                .permitAll().antMatchers("/descargarfactura/**")
-                //.permitAll().antMatchers("/send/**")
-                .permitAll()
-                .antMatchers("/descargarorden/**").permitAll()
-                .antMatchers("/api/**").permitAll()
-                .antMatchers("/descargarpago/**").permitAll()
-                .antMatchers("/cliente/**").hasAnyRole(USER)
-                .antMatchers("/editar/**").hasAnyRole(ADMIN)
-                .antMatchers("/eliminar/**").hasAnyRole(ADMIN)
-                .antMatchers("/listar/**").hasAnyRole(USER, ADMIN)
-                .antMatchers("/layout/**").hasAnyRole(USER)
-                .antMatchers("/plan/**").hasAnyRole(ADMIN, USER)
-                .antMatchers("/factura/**").hasAnyRole(ADMIN)
-                .antMatchers("/vercliente").hasAnyRole(ADMIN)
-                .anyRequest()
-                .authenticated().and()
+        http
+                .csrf().disable()
+                .authorizeRequests()
+                .antMatchers("/dist/**", "/plugins/**", "/css/**", "/js/**", "/manifest.json", "/sw.js").permitAll()
+                .antMatchers("/descargarfactura/**", "/descargarorden/**", "/descargarpago/**").permitAll()
+                .antMatchers("/login").permitAll()
+                .anyRequest().authenticated()
+                .and()
                 .formLogin()
-                .loginPage("/login") // URL de tu login personalizado
-                .loginProcessingUrl("/login") // URL donde se envían los datos del formulario
-                .successHandler(successHandler) // tu handler de login exitoso
-                .failureUrl("/login?error=true") // URL en caso de error
-                .permitAll()
+                .loginPage("/login")
+                .loginProcessingUrl("/login")
                 .successHandler(successHandler)
-                .permitAll().and().logout()
-                .permitAll().and().exceptionHandling()
-                .accessDeniedPage("/error_403");
+                .failureUrl("/login?error=true")
+                .permitAll()
+                .and()
+                .logout().logoutSuccessUrl("/login?logout=true").permitAll()
+                .and()
+                .exceptionHandling()
+                .authenticationEntryPoint(authEntryPoint());
+    }
 
+    private AuthenticationEntryPoint authEntryPoint() {
+        return (request, response, authException) -> {
+            String uri = request.getRequestURI();
+            String accept = request.getHeader("Accept");
+            boolean isApi = uri.startsWith("/api/");
+            boolean isAjax = accept != null && accept.contains("application/json");
+
+            if (isApi || isAjax) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"status\":\"error\",\"message\":\"Sesion expirada\"}");
+            } else {
+                response.sendRedirect("/login");
+            }
+        };
     }
 
     @Autowired
-    public void configurerGlobal(AuthenticationManagerBuilder build)
-            throws Exception {
+    public void configurerGlobal(AuthenticationManagerBuilder build) throws Exception {
         PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
         UserBuilder users = User.builder().passwordEncoder(encoder::encode);
-        build.inMemoryAuthentication().withUser(
-                        users.username("camiloleal")
-                                .password("T3CN02020+-+")
-                                .roles(ADMIN)).withUser(
-                        users.username("fernando")
-                                .password("Fernando2020+-")
-                                .roles(USER)).withUser(
-                        users.username("audiluz")
-                                .password("audiluz").roles(USER))
-                .withUser(users.username("jose")
-                        .password("jose")
-                        .roles(USER))
-                .withUser(users.username("cachi")
-                        .password("cachi")
-                        .roles(USER));
+
+        for (AppUser appUser : AppUser.values()) {
+            build.inMemoryAuthentication().withUser(
+                    users.username(appUser.getUsername())
+                            .password(appUser.getPassword())
+                            .roles(appUser.getRole().name())
+            );
+        }
     }
 }

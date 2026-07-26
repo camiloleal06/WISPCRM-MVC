@@ -59,6 +59,6 @@ public class FacturacionProgramada {
                 factura.getNombres(),
                 factura.getIdFactura(),
                 factura.getMora()
-        );
+        ) + ConstantMensaje.MEDIOS_DE_PAGO;
     }
 }

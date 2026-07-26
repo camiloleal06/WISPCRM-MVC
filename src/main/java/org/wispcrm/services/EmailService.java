@@ -39,24 +39,4 @@ public class EmailService {
             e.printStackTrace();
         }
     }
-
-    @Async("threadPoolTaskExecutor")
-    public void sendMailNotification(Factura factura) {
-        Context context = new Context();
-        context.setVariable("factura", factura);
-        String process = templateEngine.process("pago", context);
-        javax.mail.internet.MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
-        try {
-            helper.setSubject("Notificación pago cliente " + factura.getCliente().getNombres());
-            helper.setText(process, true);
-            helper.setTo("camilojesus1@gmail.com");
-            javaMailSender.send(mimeMessage);
-            System.out.println("Enviando email ...");
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
-
-        // return "email";
-    }
 }

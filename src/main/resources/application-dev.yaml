@@ -1,6 +1,6 @@
 spring:
   profiles: dev
 mikrotik:
-  host: "10.10.2.1"
+  host: "192.168.40.18"
   username: "api"
   password: "api"

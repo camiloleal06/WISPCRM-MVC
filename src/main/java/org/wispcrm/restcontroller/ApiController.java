@@ -160,6 +160,18 @@ public class ApiController {
 
             Cliente cliente = clienteService.toCliente(dto);
             clienteService.save(cliente);
+
+            // Crear PPPoE en MikroTik solo para clientes nuevos
+            if (esNuevo && cliente.getPppoeUser() != null && !cliente.getPppoeUser().isBlank()) {
+                try {
+                    org.wispcrm.modelo.profiles.Profile profile = profileService.findOne(cliente.getProfileId());
+                    funciones.addPPPoE(profile, cliente);
+                    log.info("[CREAR_CLIENTE] PPPoE creado en MikroTik: {}", cliente.getPppoeUser());
+                } catch (Exception e) {
+                    log.warn("[CREAR_CLIENTE] No se pudo crear PPPoE en MikroTik para {}: {}", cliente.getPppoeUser(), e.getMessage());
+                }
+            }
+
             return ok(action, "Cliente " + dto.getNombres() + " guardado");
         } catch (IllegalArgumentException e) {
             return badRequest(action, e.getMessage());
@@ -187,7 +199,7 @@ public class ApiController {
             String nombres = cliente.getNombres() + " " + cliente.getApellidos();
             cliente.setEstado(EstadoCliente.ACTIVO);
             clienteService.save(cliente);
-            try { funciones.reactivarEnMikrotik(cliente); } catch (Exception e) {
+            try { funciones.reactivateEnMikrotik(cliente); } catch (Exception e) {
                 log.warn("[REACTIVAR_CLIENTE] MikroTik no disponible para {}: {}", nombres, e.getMessage());
             }
             if (suspensionNotify) {
@@ -210,7 +222,7 @@ public class ApiController {
             String nombres = cliente.getNombres() + " " + cliente.getApellidos();
             cliente.setEstado(EstadoCliente.ACTIVO);
             clienteService.save(cliente);
-            try { funciones.reactivarEnMikrotik(cliente); } catch (Exception e) {
+            try { funciones.reactivateEnMikrotik(cliente); } catch (Exception e) {
                 log.warn("[REACTIVAR_FORZADO] MikroTik no disponible para {}: {}", nombres, e.getMessage());
             }
             return ok("REACTIVAR_FORZADO", nombres + " reactivado sin pago (forzado)");
@@ -397,7 +409,8 @@ public class ApiController {
 
             // Notificar al cliente
             if (suspensionNotify) {
-                List<FacturaDto> pendientes = facturaDao.facturasPendientesByCliente(factura.getCliente().getId());
+                List<FacturaDto> pendientes = facturaDao.facturasPendientesByCliente(factura.getCliente().getId())
+                        .stream().filter(f -> f.getIdFactura() != id).collect(java.util.stream.Collectors.toList());
                 StringBuilder msg = new StringBuilder();
                 msg.append("\u2705 *Pago Recibido*\n\n");
                 msg.append("Estimado(a) ").append(nombres).append(",\n\n");
@@ -463,6 +476,37 @@ public class ApiController {
                 facturaDao.save(f);
                 pagosDao.save(org.wispcrm.modelo.pagos.Pago.builder().pago(f.getValor()).saldo(0).factura(f).build());
                 ok++;
+
+                if (suspensionNotify) {
+                    String nombres = f.getCliente().getNombres() + " " + f.getCliente().getApellidos();
+                    List<FacturaDto> pendientes = facturaDao.facturasPendientesByCliente(f.getCliente().getId())
+                            .stream().filter(p -> p.getIdFactura() != id).collect(java.util.stream.Collectors.toList());
+                    StringBuilder msg = new StringBuilder();
+                    msg.append("\u2705 *Pago Recibido*\n\n");
+                    msg.append("Estimado(a) ").append(nombres).append(",\n\n");
+                    msg.append("Hemos recibido el pago de su factura #").append(id)
+                       .append(" por valor de $").append(String.format("%,.0f", f.getValor())).append(".\n");
+                    if (!pendientes.isEmpty()) {
+                        double totalDeuda = pendientes.stream().mapToDouble(FacturaDto::getValorFactura).sum();
+                        msg.append("\n\u26A0\uFE0F *A\u00fan tiene facturas pendientes:*\n\n");
+                        for (FacturaDto p : pendientes) {
+                            msg.append("  \u2022 Factura #").append(p.getIdFactura())
+                               .append(" - $").append(String.format("%,.0f", p.getValorFactura()));
+                            if (p.getMora() > 0) msg.append(" (").append(p.getMora()).append(" d\u00edas)");
+                            msg.append("\n");
+                        }
+                        msg.append("\n\uD83D\uDCB0 *Total pendiente: $").append(String.format("%,.0f", totalDeuda)).append("*\n");
+                    } else {
+                        msg.append("\n\uD83C\uDF89 *No tiene facturas pendientes.* \u00a1Gracias!");
+                    }
+                    msg.append(org.wispcrm.utils.ConstantMensaje.MEDIOS_DE_PAGO);
+                    msg.append("\nAtt. SYSRED");
+                    whatsappService.sendSimpleMessageWasenderapi(f.getCliente().getTelefono(), msg.toString());
+                    whatsappService.sendSimpleMessageToGroupWasApiSender(WHATSAPP_GROUP_ID,
+                            "\u2705 Pago recibido: " + nombres + " | Factura #" + id
+                            + " | $" + String.format("%,.0f", f.getValor())
+                            + (pendientes.isEmpty() ? " | Sin deuda" : " | Pendientes: " + pendientes.size()));
+                }
             } catch (Exception e) { fail++; log.error("[PAGAR_BATCH] Error factura {}: {}", id, e.getMessage()); }
         }
         log.info("[PAGAR_BATCH] Pagadas: {} | Fallidas: {}", ok, fail);

@@ -60,7 +60,8 @@ public class Funciones extends Conectar {
     }
 
     public void suspender(Cliente cliente) throws MikrotikApiException {
-        if (cliente.getIpAddress() == null || cliente.getIpAddress().isBlank()) {
+        String ip = cliente.getIpAddress();
+        if (ip == null || ip.isBlank()) {
             log.warn("Cliente {} no tiene IP asignada, no se puede suspender en MikroTik", cliente.getNombres());
             return;
         }
@@ -69,16 +70,12 @@ public class Funciones extends Conectar {
             return;
         }
         try {
-            List<Map<String, String>> existing = con.execute(
-                    "/ip/firewall/address-list/print where address=" + cliente.getIpAddress());
-
-            if (existing == null || existing.isEmpty()) {
-                String cmd = "/ip/firewall/address-list/add address=" + cliente.getIpAddress() + " list=Morosos";
-                if (cliente.getPppoeUser() != null && !cliente.getPppoeUser().isBlank()) {
-                    cmd += " comment=" + cliente.getPppoeUser();
-                }
+            if (con.execute("/ip/firewall/address-list/print where address=" + ip + " list=Moroso").isEmpty()) {
+                String cmd = "/ip/firewall/address-list/add address=" + ip + " list=Moroso";
+                String user = cliente.getPppoeUser();
+                if (user != null && !user.isBlank()) cmd += " comment=\"" + user + "\"";
                 con.execute(cmd);
-                log.info("Cliente suspendido en MikroTik: {} ({})", cliente.getNombres(), cliente.getIpAddress());
+                log.info("Cliente suspendido en MikroTik: {} ({})", cliente.getNombres(), ip);
             } else {
                 log.info("Cliente ya está en lista Morosos: {}", cliente.getNombres());
             }
@@ -90,20 +87,19 @@ public class Funciones extends Conectar {
         }
     }
 
-    public void reactivarEnMikrotik(Cliente cliente) throws MikrotikApiException {
-        if (cliente.getIpAddress() == null || cliente.getIpAddress().isBlank()) return;
+    public void reactivateEnMikrotik(Cliente cliente) throws MikrotikApiException {
+        String ip = cliente.getIpAddress();
+        if (ip == null || ip.isBlank()) return;
         if (!connect()) {
             log.error("No hay conexión con Mikrotik para reactivar a {}", cliente.getNombres());
             return;
         }
         try {
             List<Map<String, String>> existing = con.execute(
-                    "/ip/firewall/address-list/print where address=" + cliente.getIpAddress());
-
-            if (existing != null && !existing.isEmpty()) {
-                String entryId = existing.get(0).get(".id");
-                con.execute("/ip/firewall/address-list/remove .id=" + entryId);
-                log.info("Cliente removido de Morosos: {} ({})", cliente.getNombres(), cliente.getIpAddress());
+                    "/ip/firewall/address-list/print where address=" + ip + " list=Moroso");
+            if (!existing.isEmpty()) {
+                con.execute("/ip/firewall/address-list/remove .id=" + existing.get(0).get(".id"));
+                log.info("Cliente removido de Morosos: {} ({})", cliente.getNombres(), ip);
             }
         } catch (Exception e) {
             log.error("Error reactivando cliente en MikroTik: {}", cliente.getNombres(), e);

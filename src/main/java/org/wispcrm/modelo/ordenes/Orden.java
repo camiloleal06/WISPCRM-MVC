@@ -2,15 +2,7 @@ package org.wispcrm.modelo.ordenes;
 
 import java.util.Date;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -42,4 +34,10 @@ public class Orden {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date fechaFin;
     private String observacion;
+    @Column(columnDefinition = "TEXT")
+    private String descripcion;
+    @Enumerated(EnumType.STRING)
+    private EstadoOrden estado = EstadoOrden.ABIERTA;
+    @Column(columnDefinition = "TEXT")
+    private String comentarioCierre;
 }

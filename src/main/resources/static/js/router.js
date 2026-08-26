@@ -6,6 +6,7 @@ const Router = {
         '/facturas':  { page: FacturasPage },
         '/pagos':     { page: PagosPage },
         '/planes':    { page: PlanesPage },
+        '/ordenes':   { page: OrdenesPage },
     },
 
     app: null,

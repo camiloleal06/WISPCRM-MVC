@@ -18,4 +18,8 @@ public interface OrdenInterface {
 
     List<Operario> findAllOperario();
 
+    Orden cerrarOrden(Integer id, String comentario);
+
+    List<Orden> cerrarTodasAbiertas();
+
 }

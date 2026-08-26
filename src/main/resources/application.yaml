@@ -40,7 +40,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL5InnoDBDialect
     hibernate:
-      ddl-auto: none    # Changed for production safety
+      ddl-auto: none    # Changed for production safety    # Changed for production safety
     open-in-view: false
     show-sql: false     # Disable SQL logging in production
   mail:

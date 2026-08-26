@@ -1,0 +1,86 @@
+<html xmlns:th="http://thymeleaf.org">
+<head th:replace="layout/layout :: head"></head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+    <nav th:replace="layout/layout :: menu"></nav>
+    <aside th:replace="layout/layout :: sidebar"></aside>
+    <div class="content-wrapper">
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6"><h1 class="m-0 text-dark">Cerrar Orden de Trabajo</h1></div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a th:href="@{/}">Inicio</a></li>
+                            <li class="breadcrumb-item"><a th:href="@{/ordenes}">Órdenes</a></li>
+                            <li class="breadcrumb-item active">Cerrar</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="content">
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <!-- Resumen de la orden -->
+                        <div class="card card-info">
+                            <div class="card-header">
+                                <h3 class="card-title">Orden #<span th:text="${orden.id}"></span></h3>
+                            </div>
+                            <div class="card-body">
+                                <dl class="row">
+                                    <dt class="col-sm-4">Cliente:</dt>
+                                    <dd class="col-sm-8" th:text="${orden.cliente != null ? orden.cliente.nombres + ' ' + orden.cliente.apellidos : ''}"></dd>
+
+                                    <dt class="col-sm-4">Teléfono:</dt>
+                                    <dd class="col-sm-8" th:text="${orden.cliente != null ? orden.cliente.telefono : ''}"></dd>
+
+                                    <dt class="col-sm-4">Tipo:</dt>
+                                    <dd class="col-sm-8" th:text="${orden.tipoOrden != null ? orden.tipoOrden.descripcion : ''}"></dd>
+
+                                    <dt class="col-sm-4">Descripción:</dt>
+                                    <dd class="col-sm-8" th:text="${orden.descripcion}"></dd>
+
+                                    <dt class="col-sm-4">Técnico:</dt>
+                                    <dd class="col-sm-8" th:text="${orden.operario != null ? orden.operario.nombres : ''}"></dd>
+
+                                    <dt class="col-sm-4">Fecha inicio:</dt>
+                                    <dd class="col-sm-8" th:text="${#dates.format(orden.fechaInicio, 'dd/MM/yyyy')}"></dd>
+                                </dl>
+                            </div>
+                        </div>
+
+                        <!-- Formulario de cierre -->
+                        <div class="card card-success">
+                            <div class="card-header">
+                                <h3 class="card-title">Registrar trabajo realizado</h3>
+                            </div>
+                            <form th:action="@{/orden/cerrar/{id}(id=${orden.id})}" method="post">
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label>Comentario del trabajo realizado <span class="text-danger">*</span></label>
+                                        <textarea name="comentarioCierre" class="form-control" rows="5"
+                                                  placeholder="Describa el trabajo realizado, materiales usados, solución aplicada..."
+                                                  required></textarea>
+                                        <small class="text-muted">Este comentario se enviará al cliente por WhatsApp.</small>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-check-circle"></i> Cerrar Orden y Notificar
+                                    </button>
+                                    <a th:href="@{/ordenes}" class="btn btn-secondary ml-2">Cancelar</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <footer th:replace="layout/layout :: footer"></footer>
+</div>
+</body>
+</html>

@@ -17,6 +17,8 @@ import org.wispcrm.modelo.ordenes.TipoOrden;
 
 import lombok.AllArgsConstructor;
 
+import org.wispcrm.modelo.ordenes.EstadoOrden;
+
 /**
  * @author camilo.leal
  *
@@ -53,6 +55,26 @@ public class OrdenService implements OrdenInterface {
     @Override
     public List<Operario> findAllOperario() {
         return this.operarioDao.findAll();
+    }
+
+    @Override
+    public Orden cerrarOrden(Integer id, String comentario) {
+        Orden orden = findOrdenById(id);
+        orden.setEstado(EstadoOrden.CERRADA);
+        orden.setComentarioCierre(comentario);
+        orden.setFechaFin(new java.util.Date());
+        return this.ordenDao.save(orden);
+    }
+
+    @Override
+    public List<Orden> cerrarTodasAbiertas() {
+        List<Orden> abiertas = this.ordenDao.findByEstado(EstadoOrden.ABIERTA);
+        abiertas.forEach(o -> {
+            o.setEstado(EstadoOrden.CERRADA);
+            o.setComentarioCierre("Cerrada masivamente");
+            o.setFechaFin(new java.util.Date());
+        });
+        return this.ordenDao.saveAll(abiertas);
     }
 
 }

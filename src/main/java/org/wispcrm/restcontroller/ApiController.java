@@ -12,6 +12,7 @@ import org.wispcrm.daos.InterfacePagos;
 import org.wispcrm.interfaces.PlanInterface;
 import org.wispcrm.interfaces.ProfileInterface;
 import org.wispcrm.mikrotik.Funciones;
+import org.wispcrm.interfaces.OrdenInterface;
 import org.wispcrm.modelo.clientes.Cliente;
 import org.wispcrm.modelo.clientes.ClienteDTO;
 import org.wispcrm.modelo.clientes.EditarClienteDTO;
@@ -19,6 +20,10 @@ import org.wispcrm.modelo.clientes.EstadoCliente;
 import org.wispcrm.modelo.facturas.DeudorDTO;
 import org.wispcrm.modelo.facturas.FacturaDto;
 import org.wispcrm.modelo.facturas.ResumenFacturasDTO;
+import org.wispcrm.modelo.ordenes.EstadoOrden;
+import org.wispcrm.modelo.ordenes.Operario;
+import org.wispcrm.modelo.ordenes.Orden;
+import org.wispcrm.modelo.ordenes.TipoOrden;
 import org.wispcrm.modelo.pagos.PagoDTO;
 import org.wispcrm.modelo.pagos.PagoMensualDTO;
 import org.wispcrm.modelo.planes.Plan;
@@ -45,6 +50,7 @@ public class ApiController {
     private final ProfileInterface profileService;
     private final Funciones funciones;
     private final WhatsappMessageService whatsappService;
+    private final OrdenInterface ordenService;
 
     @org.springframework.beans.factory.annotation.Value("${sysred.notification.suspensionNotify}")
     private boolean suspensionNotify;
@@ -231,7 +237,7 @@ public class ApiController {
         }
     }
 
-    private static final String WHATSAPP_GROUP_ID = "120363146011086828@g.us";
+    private static final String WHATSAPP_GROUP_ID = org.wispcrm.utils.ConstantMensaje.WHATSAPP_GROUP_ID;
 
     @PutMapping("/clientes/{id}/suspender")
     public ResponseEntity<Map<String, String>> suspenderCliente(@PathVariable int id) {
@@ -599,5 +605,114 @@ public class ApiController {
     @GetMapping("/profiles")
     public ResponseEntity<List<Profile>> listarProfiles() {
         return ResponseEntity.ok(profileService.findAll());
+    }
+
+    // ==================== ÓRDENES ====================
+
+    @GetMapping("/ordenes")
+    public ResponseEntity<List<Map<String, Object>>> listarOrdenes() {
+        return ResponseEntity.ok(ordenService.findAll().stream().map(this::ordenToMap).collect(java.util.stream.Collectors.toList()));
+    }
+
+    @GetMapping("/ordenes/tipos")
+    public ResponseEntity<List<TipoOrden>> listarTipos() {
+        return ResponseEntity.ok(ordenService.findAllTipoOrden());
+    }
+
+    @GetMapping("/ordenes/operarios")
+    public ResponseEntity<List<Operario>> listarOperarios() {
+        return ResponseEntity.ok(ordenService.findAllOperario());
+    }
+
+    @PostMapping("/ordenes")
+    public ResponseEntity<Map<String, String>> crearOrden(@RequestBody Map<String, Object> body) {
+        try {
+            Orden orden = new Orden();
+            orden.setDescripcion((String) body.get("descripcion"));
+            orden.setFechaInicio(new java.util.Date());
+            orden.setEstado(EstadoOrden.ABIERTA);
+
+            int clienteId = Integer.parseInt(body.get("clienteId").toString());
+            orden.setCliente(clienteService.findById(clienteId));
+
+            Object tipoId = body.get("tipoOrdenId");
+            if (tipoId != null && !tipoId.toString().isBlank())
+                orden.setTipoOrden(ordenService.findAllTipoOrden().stream()
+                    .filter(t -> t.getId() == Integer.parseInt(tipoId.toString())).findFirst().orElse(null));
+
+            Object opId = body.get("operarioId");
+            if (opId != null && !opId.toString().isBlank())
+                orden.setOperario(ordenService.findAllOperario().stream()
+                    .filter(o -> o.getId() == Integer.parseInt(opId.toString())).findFirst().orElse(null));
+
+            Orden saved = ordenService.createOrden(orden);
+
+            String msg = String.format(
+                "\uD83D\uDD27 *Nueva Orden #%d*\n" +
+                "\uD83D\uDC64 *Cliente:* %s\n" +
+                "\uD83D\uDCCB *Tipo:* %s\n" +
+                "\uD83D\uDCDD *Descripci\u00f3n:* %s\n" +
+                "\uD83D\uDC77 *T\u00e9cnico:* %s",
+                saved.getId(),
+                saved.getCliente().getNombres() + " " + saved.getCliente().getApellidos(),
+                saved.getTipoOrden() != null ? saved.getTipoOrden().getDescripcion() : "N/A",
+                saved.getDescripcion(),
+                saved.getOperario() != null ? saved.getOperario().getNombres() : "N/A"
+            );
+            whatsappService.sendSimpleMessageToGroupWasApiSender(WHATSAPP_GROUP_ID, msg);
+
+            return ok("CREAR_ORDEN", "Orden #" + saved.getId() + " creada y notificada al grupo");
+        } catch (Exception e) {
+            return error("CREAR_ORDEN", "Error al crear orden", e);
+        }
+    }
+
+    @PostMapping("/ordenes/{id}/cerrar")
+    public ResponseEntity<Map<String, String>> cerrarOrden(@PathVariable int id, @RequestBody Map<String, String> body) {
+        try {
+            String comentario = body.get("comentario");
+            Orden orden = ordenService.cerrarOrden(id, comentario);
+
+            String msg = String.format(
+                "\u2705 *Orden #%d CERRADA*\n" +
+                "\uD83D\uDC64 *Cliente:* %s\n" +
+                "\uD83D\uDCCB *Tipo:* %s\n" +
+                "\uD83D\uDD27 *Trabajo realizado:* %s\n" +
+                "\uD83D\uDC77 *T\u00e9cnico:* %s",
+                orden.getId(),
+                orden.getCliente().getNombres() + " " + orden.getCliente().getApellidos(),
+                orden.getTipoOrden() != null ? orden.getTipoOrden().getDescripcion() : "N/A",
+                comentario,
+                orden.getOperario() != null ? orden.getOperario().getNombres() : "N/A"
+            );
+            whatsappService.sendSimpleMessageToGroupWasApiSender(WHATSAPP_GROUP_ID, msg);
+
+            return ok("CERRAR_ORDEN", "Orden #" + id + " cerrada y notificada al grupo");
+        } catch (Exception e) {
+            return error("CERRAR_ORDEN", "Error al cerrar orden", e);
+        }
+    }
+
+    @PostMapping("/ordenes/cerrar-todas")
+    public ResponseEntity<Map<String, String>> cerrarTodasOrdenes() {
+        try {
+            List<Orden> cerradas = ordenService.cerrarTodasAbiertas();
+            return ok("CERRAR_TODAS", cerradas.size() + " órdenes cerradas");
+        } catch (Exception e) {
+            return error("CERRAR_TODAS", "Error al cerrar órdenes", e);
+        }
+    }
+
+    private Map<String, Object> ordenToMap(Orden o) {
+        Map<String, Object> m = new HashMap<>();
+        m.put("id", o.getId());
+        m.put("clienteNombre", o.getCliente() != null ? o.getCliente().getNombres() + " " + o.getCliente().getApellidos() : "");
+        m.put("tipoOrden", o.getTipoOrden() != null ? o.getTipoOrden().getDescripcion() : "");
+        m.put("descripcion", o.getDescripcion());
+        m.put("operario", o.getOperario() != null ? o.getOperario().getNombres() : "");
+        m.put("fechaInicio", o.getFechaInicio() != null ? new java.text.SimpleDateFormat("dd/MM/yyyy").format(o.getFechaInicio()) : "");
+        m.put("estado", o.getEstado() != null ? o.getEstado().name() : "ABIERTA");
+        m.put("comentarioCierre", o.getComentarioCierre());
+        return m;
     }
 }

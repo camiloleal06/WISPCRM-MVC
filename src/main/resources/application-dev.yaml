@@ -1,5 +1,7 @@
 spring:
-  profiles: dev
+  config:
+    activate:
+      on-profile: dev
 mikrotik:
   host: "192.168.40.18"
   username: "api"

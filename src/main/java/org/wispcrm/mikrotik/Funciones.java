@@ -70,11 +70,15 @@ public class Funciones extends Conectar {
             return;
         }
         try {
-            if (con.execute("/ip/firewall/address-list/print where address=" + ip + " list=Moroso").isEmpty()) {
-                String cmd = "/ip/firewall/address-list/add address=" + ip + " list=Moroso";
+            List<Map<String, String>> existing = con.execute(
+                    "/ip/firewall/address-list/print where address=" + ip);
+            boolean yaEstaEnMoroso = existing.stream()
+                    .anyMatch(e -> "Moroso".equals(e.get("list")));
+            if (!yaEstaEnMoroso) {
                 String user = cliente.getPppoeUser();
-                if (user != null && !user.isBlank()) cmd += " comment=\"" + user + "\"";
-                con.execute(cmd);
+                String comment = (user != null && !user.isBlank()) ? user : cliente.getNombres();
+                comment = comment.replaceAll("[^a-zA-Z0-9._\\-]", "_");
+                con.execute("/ip/firewall/address-list/add address=" + ip + " list=Moroso comment=" + comment);
                 log.info("Cliente suspendido en MikroTik: {} ({})", cliente.getNombres(), ip);
             } else {
                 log.info("Cliente ya está en lista Morosos: {}", cliente.getNombres());

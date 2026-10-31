@@ -20,6 +20,12 @@ const Router = {
     async resolve() {
         const hash = location.hash.replace('#', '') || '/';
 
+        // Restringir cajero solo a facturas
+        if (Utils.isCajero && Utils.isCajero() && hash !== '/facturas') {
+            location.hash = '#/facturas';
+            return;
+        }
+
         // /clientes/nuevo
         if (hash === '/clientes/nuevo') {
             return this.render(ClienteFormPage);
@@ -91,4 +97,6 @@ const Router = {
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => Router.init());
+document.addEventListener('DOMContentLoaded', () => {
+    // Router se inicia desde index.html después de cargar el usuario
+});

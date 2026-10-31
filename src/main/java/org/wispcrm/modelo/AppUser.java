@@ -9,7 +9,8 @@ public enum AppUser {
     FERNANDO("fernando", "Fernando2020+-", Role.USER),
     AUDILUZ("audiluz", "audiluz", Role.USER),
     JOSE("jose", "jose", Role.USER),
-    CACHI("cachi", "cachi", Role.USER);
+    CACHI("cachi", "cachi", Role.USER),
+    MARIO("mario", "mario", Role.CAJERO);
 
     private final String username;
     private final String password;
@@ -22,6 +23,6 @@ public enum AppUser {
     }
 
     public enum Role {
-        ADMIN, USER
+        ADMIN, USER, CAJERO
     }
 }

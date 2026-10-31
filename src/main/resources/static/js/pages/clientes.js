@@ -2,29 +2,16 @@ const ClientesPage = {
     async render() {
         const clientes = await API.get('/clientes');
         if (!clientes) return '';
-        const rows = clientes.map(c => `
-            <tr>
-                <td>${c.nombres}</td>
-                <td>${c.telefono}</td>
-                <td>${Utils.formatMoney(c.valor)}</td>
-                <td>${Utils.estadoBadge(c.estado)}</td>
-                <td class="text-nowrap">
-                    <a href="#/clientes/${c.id}" class="btn btn-info btn-sm" title="Ver"><i class="fas fa-eye"></i></a>
-                    ${Utils.isAdmin() ? `<a href="#/clientes/${c.id}/editar" class="btn btn-warning btn-sm" title="Editar"><i class="fas fa-user-edit"></i></a>` : ''}
-                    ${c.estado === 'ACTIVO' ? `
-                        <a href="/facturar/${c.id}" class="btn btn-success btn-sm" title="Facturar"><i class="fas fa-file-invoice"></i></a>
-                        ${Utils.isAdmin() ? `<button class="btn btn-dark btn-sm" onclick="ClientesPage.suspender(${c.id})" title="Suspender"><i class="fas fa-ban"></i></button>` : ''}
-                        ${Utils.isAdmin() ? `<button class="btn btn-danger btn-sm" onclick="ClientesPage.eliminar(${c.id})" title="Desactivar"><i class="fas fa-user-minus"></i></button>` : ''}
-                    ` : ''}
-                    ${c.estado === 'SUSPENDIDO' && Utils.isAdmin() ? `
-                        <button class="btn btn-success btn-sm" onclick="ClientesPage.reactivar(${c.id})" title="Reactivar"><i class="fas fa-user-plus"></i></button>
-                        <button class="btn btn-outline-success btn-sm" onclick="ClientesPage.reactivarForzado(${c.id})" title="Reactivar sin pago"><i class="fas fa-unlock"></i></button>
-                    ` : ''}
-                    ${c.estado === 'INACTIVO' && Utils.isAdmin() ? `
-                        <button class="btn btn-success btn-sm" onclick="ClientesPage.reactivar(${c.id})" title="Reactivar"><i class="fas fa-user-plus"></i></button>
-                    ` : ''}
-                </td>
-            </tr>`).join('');
+        this._clientes = clientes;
+        this._soloSinIp = false;
+        return ClientesPage.buildHtml(clientes, false);
+    },
+
+    buildHtml(clientes, soloSinIp) {
+        const filtrados = soloSinIp ? clientes.filter(c => !c.ipAddress || c.ipAddress.trim() === '') : clientes;
+        const rows = filtrados.map(c => ClientesPage.buildRow(c)).join('');
+
+        const sinIpCount = clientes.filter(c => (!c.ipAddress || c.ipAddress.trim() === '') && c.estado !== 'INACTIVO').length;
 
         return `
         <div class="content-header"><div class="container-fluid">
@@ -32,6 +19,9 @@ const ClientesPage = {
                 <div class="col-sm-6"><h1 class="m-0">Clientes</h1></div>
                 <div class="col-sm-6 text-right">
                     <a href="#/clientes/nuevo" class="btn btn-primary"><i class="fas fa-plus mr-1"></i>Nuevo Cliente</a>
+                    <button onclick="ClientesPage.toggleSinIp()" class="btn btn-warning ml-1" id="btn-sin-ip">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>Sin IP (${sinIpCount})
+                    </button>
                     ${Utils.isAdmin() ? '<a href="#" onclick="ClientesPage.facturarLote(); return false;" class="btn btn-success ml-1"><i class="fas fa-file-invoice-dollar mr-1"></i>Facturar Lote</a>' : ''}
                 </div>
             </div>
@@ -48,7 +38,47 @@ const ClientesPage = {
         </div></section>`;
     },
 
+    _clientes: [],
+    _soloSinIp: false,
+
     afterRender() { Utils.initDataTable('#tbl-clientes'); },
+
+    toggleSinIp() {
+        this._soloSinIp = !this._soloSinIp;
+        const btn = document.getElementById('btn-sin-ip');
+        if (btn) btn.classList.toggle('btn-warning', !this._soloSinIp) || btn.classList.toggle('btn-danger', this._soloSinIp);
+        const tbody = document.querySelector('#tbl-clientes tbody');
+        if (!tbody) return;
+        const filtrados = this._soloSinIp
+            ? this._clientes.filter(c => (!c.ipAddress || c.ipAddress.trim() === '') && c.estado !== 'INACTIVO')
+            : this._clientes;
+        tbody.innerHTML = filtrados.map(c => this.buildRow(c)).join('');
+    },
+
+    buildRow(c) {
+        return `<tr class="${!c.ipAddress || c.ipAddress.trim() === '' ? 'table-warning' : ''}">
+            <td>${c.nombres}</td>
+            <td>${c.telefono}</td>
+            <td>${Utils.formatMoney(c.valor)}</td>
+            <td>${Utils.estadoBadge(c.estado)}</td>
+            <td class="text-nowrap">
+                <a href="#/clientes/${c.id}" class="btn btn-info btn-sm" title="Ver"><i class="fas fa-eye"></i></a>
+                ${Utils.isAdmin() ? `<a href="#/clientes/${c.id}/editar" class="btn btn-warning btn-sm" title="Editar"><i class="fas fa-user-edit"></i></a>` : ''}
+                ${c.estado === 'ACTIVO' ? `
+                    <a href="/facturar/${c.id}" class="btn btn-success btn-sm" title="Facturar"><i class="fas fa-file-invoice"></i></a>
+                    ${Utils.isAdmin() ? `<button class="btn btn-dark btn-sm" onclick="ClientesPage.suspender(${c.id})" title="Suspender"><i class="fas fa-ban"></i></button>` : ''}
+                    ${Utils.isAdmin() ? `<button class="btn btn-danger btn-sm" onclick="ClientesPage.eliminar(${c.id})" title="Desactivar"><i class="fas fa-user-minus"></i></button>` : ''}
+                ` : ''}
+                ${c.estado === 'SUSPENDIDO' && Utils.isAdmin() ? `
+                    <button class="btn btn-success btn-sm" onclick="ClientesPage.reactivar(${c.id})" title="Reactivar"><i class="fas fa-user-plus"></i></button>
+                    <button class="btn btn-outline-success btn-sm" onclick="ClientesPage.reactivarForzado(${c.id})" title="Reactivar sin pago"><i class="fas fa-unlock"></i></button>
+                ` : ''}
+                ${c.estado === 'INACTIVO' && Utils.isAdmin() ? `
+                    <button class="btn btn-success btn-sm" onclick="ClientesPage.reactivar(${c.id})" title="Reactivar"><i class="fas fa-user-plus"></i></button>
+                ` : ''}
+            </td>
+        </tr>`;
+    },
 
     async eliminar(id) {
         const res = await Utils.confirmAndRun('¿Desactivar cliente?', 'El cliente será marcado como inactivo.', 'Desactivando...',
@@ -135,6 +165,9 @@ const ClienteFormPage = {
             if (data) c = data;
         }
 
+        const ipsResult = await API.get('/ips/disponibles');
+        const ipsDisponibles = Array.isArray(ipsResult) ? ipsResult : [];
+
         const planOptions = (planes || []).map(p =>
             `<option value="${p.id}" ${p.id === c.planesId ? 'selected' : ''}>${p.nombre}</option>`
         ).join('');
@@ -142,6 +175,16 @@ const ClienteFormPage = {
         const profileOptions = (profiles || []).map(p =>
             `<option value="${p.id}" ${p.id === c.profileId ? 'selected' : ''}>${p.name}</option>`
         ).join('');
+
+        const ipActual = c.ipAddress || '';
+        let ipOptions = '<option value="">-- Seleccione IP --</option>';
+        if (ipActual) {
+            ipOptions += `<option value="${ipActual}" selected>${ipActual} (actual)</option>`;
+        }
+        ipOptions += ipsDisponibles
+            .filter(ip => ip.ip !== ipActual)
+            .map(ip => `<option value="${ip.ip}">${ip.ip}</option>`)
+            .join('');
 
         return `
         <div class="content-header"><div class="container-fluid">
@@ -199,7 +242,7 @@ const ClienteFormPage = {
                         <div class="row">
                             <div class="form-group col-md-3">
                                 <label>IP Address</label>
-                                <input type="text" id="fc-ipAddress" class="form-control" value="${c.ipAddress || ''}">
+                                <select id="fc-ipAddress" class="form-control">${ipOptions}</select>
                             </div>
                             <div class="form-group col-md-3">
                                 <label>PPPoE User</label>
@@ -235,7 +278,7 @@ const ClienteFormPage = {
             telefono: document.getElementById('fc-telefono').value,
             diapago: parseInt(document.getElementById('fc-diapago').value),
             direccion: document.getElementById('fc-direccion').value,
-            ipAddress: document.getElementById('fc-ipAddress').value,
+            ipAddress: document.getElementById('fc-ipAddress').value || null,
             pppoeUser: document.getElementById('fc-pppoeUser').value,
             pppoePass: document.getElementById('fc-pppoePass').value,
             planesId: parseInt(document.getElementById('fc-planesId').value),

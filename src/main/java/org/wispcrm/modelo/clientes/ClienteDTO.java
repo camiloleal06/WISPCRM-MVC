@@ -17,4 +17,5 @@ public class ClienteDTO {
     private String telefono;
     private double valor;
     private EstadoCliente estado;
+    private String ipAddress;
 }

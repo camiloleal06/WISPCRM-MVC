@@ -56,5 +56,9 @@ const Utils = {
 
     isAdmin() {
         return window.currentUser && window.currentUser.role === 'ROLE_ADMIN';
+    },
+
+    isCajero() {
+        return window.currentUser && window.currentUser.role === 'ROLE_CAJERO';
     }
 };

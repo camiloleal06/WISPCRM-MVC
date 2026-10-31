@@ -146,12 +146,9 @@
 									<div class="form-row col-md-12">
 										<div class="form-group col-md-3">
 											<label for="ipAddress">Dirección IP</label>
-											<input type="text"
-												   th:field="*{ipAddress}"
-												   class="form-control" id="ipAddress">
-
-											<span class="clase" th:if="${#fields.hasErrors('telefono')}"
-												  th:errors="*{ipAddress}"></span>
+											<select id="ipAddress" th:field="*{ipAddress}" class="form-control">
+												<option value="">-- Cargando IPs... --</option>
+											</select>
 										</div>
 
 										<div class="form-group col-md-3">
@@ -199,5 +196,43 @@
 		</div>
 		<footer th:replace="layout/layout :: footer"></footer>
 	</div>
+
+<script th:inline="javascript">
+document.addEventListener('DOMContentLoaded', function () {
+    const select = document.getElementById('ipAddress');
+    const ipActual = /*[[*{ipAddress}]]*/ null;
+
+    fetch('/api/v1/ips/disponibles')
+        .then(r => r.json())
+        .then(ips => {
+            select.innerHTML = '';
+
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = '-- Seleccione IP --';
+            select.appendChild(placeholder);
+
+            if (ipActual && ipActual.trim() !== '') {
+                const optActual = document.createElement('option');
+                optActual.value = ipActual;
+                optActual.textContent = ipActual + ' (actual)';
+                optActual.selected = true;
+                select.appendChild(optActual);
+            }
+
+            ips.forEach(function (ip) {
+                if (ip.ip !== ipActual) {
+                    const opt = document.createElement('option');
+                    opt.value = ip.ip;
+                    opt.textContent = ip.ip;
+                    select.appendChild(opt);
+                }
+            });
+        })
+        .catch(() => {
+            select.innerHTML = '<option value="">Error cargando IPs</option>';
+        });
+});
+</script>
 </body>
 </html>

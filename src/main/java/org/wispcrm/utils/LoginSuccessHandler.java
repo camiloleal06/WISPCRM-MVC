@@ -20,6 +20,12 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
             Authentication authentication) throws IOException, ServletException {
-        super.onAuthenticationSuccess(request, response, authentication);
+        boolean isCajero = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_CAJERO"));
+        if (isCajero) {
+            response.sendRedirect("/index.html#/facturas");
+        } else {
+            super.onAuthenticationSuccess(request, response, authentication);
+        }
     }
 }

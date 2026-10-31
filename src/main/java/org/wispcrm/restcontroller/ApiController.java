@@ -7,8 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.wispcrm.daos.ClienteDao;
+import org.wispcrm.daos.DireccionIpDao;
 import org.wispcrm.daos.InterfaceFacturas;
 import org.wispcrm.daos.InterfacePagos;
+import org.wispcrm.modelo.red.DireccionIp;
 import org.wispcrm.interfaces.PlanInterface;
 import org.wispcrm.interfaces.ProfileInterface;
 import org.wispcrm.mikrotik.Funciones;
@@ -51,6 +53,7 @@ public class ApiController {
     private final Funciones funciones;
     private final WhatsappMessageService whatsappService;
     private final OrdenInterface ordenService;
+    private final DireccionIpDao direccionIpDao;
 
     @org.springframework.beans.factory.annotation.Value("${sysred.notification.suspensionNotify}")
     private boolean suspensionNotify;
@@ -167,6 +170,14 @@ public class ApiController {
             Cliente cliente = clienteService.toCliente(dto);
             clienteService.save(cliente);
 
+            // Marcar IP como no disponible al asignar a cliente
+            if (dto.getIpAddress() != null && !dto.getIpAddress().isBlank()) {
+                direccionIpDao.findByIp(dto.getIpAddress()).ifPresent(ip -> {
+                    ip.setDisponible(false);
+                    direccionIpDao.save(ip);
+                });
+            }
+
             // Crear PPPoE en MikroTik solo para clientes nuevos
             if (esNuevo && cliente.getPppoeUser() != null && !cliente.getPppoeUser().isBlank()) {
                 try {
@@ -190,6 +201,13 @@ public class ApiController {
     public ResponseEntity<Map<String, String>> eliminarCliente(@PathVariable int id) {
         try {
             Cliente cliente = clienteService.findById(id);
+            // Liberar IP al desactivar cliente
+            if (cliente.getIpAddress() != null && !cliente.getIpAddress().isBlank()) {
+                direccionIpDao.findByIp(cliente.getIpAddress()).ifPresent(ip -> {
+                    ip.setDisponible(true);
+                    direccionIpDao.save(ip);
+                });
+            }
             cliente.setEstado(EstadoCliente.INACTIVO);
             clienteService.save(cliente);
             return ok("DESACTIVAR_CLIENTE", "Cliente " + cliente.getNombres() + " desactivado");
@@ -583,6 +601,39 @@ public class ApiController {
         cal.add(java.util.Calendar.MONTH, -11);
         cal.set(java.util.Calendar.DAY_OF_MONTH, 1);
         return ResponseEntity.ok(pagosDao.pagosPorMes(cal.getTime()));
+    }
+
+    // ==================== IPs ====================
+
+    @GetMapping("/ips")
+    public ResponseEntity<List<DireccionIp>> listarIps() {
+        return ResponseEntity.ok(direccionIpDao.findAll());
+    }
+
+    @GetMapping("/ips/disponibles")
+    public ResponseEntity<List<DireccionIp>> listarIpsDisponibles() {
+        return ResponseEntity.ok(direccionIpDao.findByDisponibleTrue());
+    }
+
+    @PostMapping("/ips")
+    public ResponseEntity<Map<String, String>> crearIp(@RequestBody DireccionIp ip) {
+        try {
+            ip.setDisponible(true);
+            direccionIpDao.save(ip);
+            return ok("CREAR_IP", "IP " + ip.getIp() + " registrada");
+        } catch (Exception e) {
+            return error("CREAR_IP", "Error al registrar IP", e);
+        }
+    }
+
+    @DeleteMapping("/ips/{id}")
+    public ResponseEntity<Map<String, String>> eliminarIp(@PathVariable int id) {
+        try {
+            direccionIpDao.deleteById(id);
+            return ok("ELIMINAR_IP", "IP eliminada");
+        } catch (Exception e) {
+            return error("ELIMINAR_IP", "Error al eliminar IP", e);
+        }
     }
 
     // ==================== PLANES & PROFILES ====================

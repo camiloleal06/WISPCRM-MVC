@@ -174,7 +174,15 @@
         if (u) {
             window.currentUser = u;
             document.getElementById('user-display').textContent = u.username;
+            if (u.role === 'ROLE_CAJERO') {
+                document.querySelector('.main-sidebar').style.display = 'none';
+                document.querySelector('.content-wrapper').style.marginLeft = '0';
+                document.querySelector('.main-footer').style.marginLeft = '0';
+                document.querySelectorAll('.nav-item.d-none.d-sm-inline-block').forEach(el => el.style.display = 'none');
+                location.hash = '#/facturas';
+            }
         }
+        Router.init();
     });
     // Register Service Worker
     if ('serviceWorker' in navigator) {

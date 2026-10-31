@@ -42,12 +42,12 @@ public interface ClienteDao extends JpaRepository<Cliente, Integer> {
     List<Cliente> findByDiapagoBetween(int diaInicial, int diaFinal);
 
     @Cacheable(value = "lista-clientes")
-    @Query("SELECT new org.wispcrm.modelo.clientes.ClienteDTO" + "(c.id, c.identificacion, CONCAT(c.nombres,' ',c.apellidos), "
-            + "c.email, c.telefono,  p.precio, c.estado) " + " FROM Cliente c JOIN c.planes p")
+    @Query("SELECT new org.wispcrm.modelo.clientes.ClienteDTO(c.id, c.identificacion, CONCAT(c.nombres,' ',c.apellidos), "
+            + "c.email, c.telefono, p.precio, c.estado, c.ipAddress) FROM Cliente c JOIN c.planes p")
     List<ClienteDTO> lista();
 
-    @Query("SELECT new org.wispcrm.modelo.clientes.ClienteDTO" + "(c.id, c.identificacion, CONCAT(c.nombres,' ',c.apellidos), "
-            + "c.email, c.telefono,  p.precio, c.estado) " + " FROM Cliente c JOIN c.planes p where c.estado=:estado")
+    @Query("SELECT new org.wispcrm.modelo.clientes.ClienteDTO(c.id, c.identificacion, CONCAT(c.nombres,' ',c.apellidos), "
+            + "c.email, c.telefono, p.precio, c.estado, c.ipAddress) FROM Cliente c JOIN c.planes p where c.estado=:estado")
     List<ClienteDTO> lista(int estado);
 
     @Query("SELECT new org.wispcrm.modelo.clientes.EditarClienteDTO (c.id, c.identificacion, c.nombres,c.apellidos, " +
@@ -55,9 +55,8 @@ public interface ClienteDao extends JpaRepository<Cliente, Integer> {
             "FROM Cliente c JOIN c.planes p where c.id=:idCliente")
     EditarClienteDTO clienteById(int idCliente);
 
-
     @Query("SELECT new org.wispcrm.modelo.clientes.ClienteDTO(c.id, c.identificacion, CONCAT(c.nombres,' ',c.apellidos), "
-            + "c.email , c.telefono, p.precio, c.estado) " + " FROM Cliente c JOIN c.planes p ")
+            + "c.email, c.telefono, p.precio, c.estado, c.ipAddress) FROM Cliente c JOIN c.planes p")
     Page<ClienteDTO> listaPaginada(Pageable pageable);
 
 }

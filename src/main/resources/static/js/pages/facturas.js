@@ -22,8 +22,8 @@ const FacturasPage = {
                 <td>${moraBadge}</td>
                 <td class="text-nowrap">
                     <button class="btn btn-primary btn-sm" onclick="FacturasPage.pagar(${f.idFactura})"><i class="fas fa-money-bill"></i></button>
-                    <a href="/descargarfactura/${f.idFactura}" class="btn btn-success btn-sm" target="_blank"><i class="fas fa-download"></i></a>
-                    <button class="btn btn-info btn-sm" onclick="FacturasPage.recordar(${f.idFactura})"><i class="fas fa-bell"></i></button>
+                    ${!Utils.isCajero() ? `<a href="/descargarfactura/${f.idFactura}" class="btn btn-success btn-sm" target="_blank"><i class="fas fa-download"></i></a>` : ''}
+                    ${!Utils.isCajero() ? `<button class="btn btn-info btn-sm" onclick="FacturasPage.recordar(${f.idFactura})"><i class="fas fa-bell"></i></button>` : ''}
                     ${suspenderBtn}
                     ${Utils.isAdmin() ? `<button class="btn btn-danger btn-sm" onclick="FacturasPage.eliminar(${f.idFactura})"><i class="fas fa-trash"></i></button>` : ''}
                 </td>

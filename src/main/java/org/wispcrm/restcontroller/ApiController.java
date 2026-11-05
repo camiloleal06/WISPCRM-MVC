@@ -178,18 +178,31 @@ public class ApiController {
                 });
             }
 
-            // Crear PPPoE en MikroTik solo para clientes nuevos
-            if (esNuevo && cliente.getPppoeUser() != null && !cliente.getPppoeUser().isBlank()) {
-                try {
-                    org.wispcrm.modelo.profiles.Profile profile = profileService.findOne(cliente.getProfileId());
-                    funciones.addPPPoE(profile, cliente);
-                    log.info("[CREAR_CLIENTE] PPPoE creado en MikroTik: {}", cliente.getPppoeUser());
-                } catch (Exception e) {
-                    log.warn("[CREAR_CLIENTE] No se pudo crear PPPoE en MikroTik para {}: {}", cliente.getPppoeUser(), e.getMessage());
+            // MikroTik
+            String mikrotikMsg = "";
+            if (cliente.getPppoeUser() != null && !cliente.getPppoeUser().isBlank()) {
+                if (cliente.getProfileId() == null) {
+                    mikrotikMsg = " (PPPoE omitido: sin profile asignado)";
+                } else if (cliente.getIpAddress() == null || cliente.getIpAddress().isBlank()) {
+                    mikrotikMsg = " (PPPoE omitido: sin IP asignada)";
+                } else {
+                    try {
+                        org.wispcrm.modelo.profiles.Profile profile = profileService.findOne(cliente.getProfileId());
+                        if (esNuevo) {
+                            funciones.addPPPoE(profile, cliente);
+                            mikrotikMsg = " (PPPoE creado en MikroTik)";
+                        } else {
+                            funciones.updatePPPoE(profile, cliente);
+                            mikrotikMsg = " (PPPoE actualizado en MikroTik)";
+                        }
+                    } catch (Exception e) {
+                        mikrotikMsg = " (PPPoE no sincronizado en MikroTik: " + e.getMessage() + ")";
+                        log.error("[{}] Error MikroTik para {}: {}", action, cliente.getPppoeUser(), e.getMessage());
+                    }
                 }
             }
 
-            return ok(action, "Cliente " + dto.getNombres() + " guardado");
+            return ok(action, "Cliente " + dto.getNombres() + " guardado" + mikrotikMsg);
         } catch (IllegalArgumentException e) {
             return badRequest(action, e.getMessage());
         } catch (Exception e) {
@@ -223,7 +236,12 @@ public class ApiController {
             String nombres = cliente.getNombres() + " " + cliente.getApellidos();
             cliente.setEstado(EstadoCliente.ACTIVO);
             clienteService.save(cliente);
-            try { funciones.reactivateEnMikrotik(cliente); } catch (Exception e) {
+            String mikrotikMsg = "";
+            try {
+                funciones.reactivateEnMikrotik(cliente);
+                mikrotikMsg = " | MikroTik: removido de Morosos";
+            } catch (Exception e) {
+                mikrotikMsg = " | MikroTik NO disponible: " + e.getMessage();
                 log.warn("[REACTIVAR_CLIENTE] MikroTik no disponible para {}: {}", nombres, e.getMessage());
             }
             if (suspensionNotify) {
@@ -231,9 +249,9 @@ public class ApiController {
                         "\u2705 *Servicio Reactivado*\n\nEstimado(a) " + nombres
                         + ",\n\nSu servicio de internet ha sido *reactivado*.\n\nGracias por su pago.\n\nAtt. SYSRED");
                 whatsappService.sendSimpleMessageToGroupWasApiSender(WHATSAPP_GROUP_ID,
-                        "\u2705 *Servicio reactivado:* " + nombres + " | IP: " + cliente.getIpAddress());
+                        "\u2705 *Servicio reactivado:* " + nombres + " | IP: " + cliente.getIpAddress() + mikrotikMsg);
             }
-            return ok("REACTIVAR_CLIENTE", nombres + " reactivado" + (suspensionNotify ? " y notificado" : ""));
+            return ok("REACTIVAR_CLIENTE", nombres + " reactivado" + mikrotikMsg);
         } catch (Exception e) {
             return error("REACTIVAR_CLIENTE", "Error al reactivar cliente " + id, e);
         }
@@ -246,10 +264,15 @@ public class ApiController {
             String nombres = cliente.getNombres() + " " + cliente.getApellidos();
             cliente.setEstado(EstadoCliente.ACTIVO);
             clienteService.save(cliente);
-            try { funciones.reactivateEnMikrotik(cliente); } catch (Exception e) {
+            String mikrotikMsg = "";
+            try {
+                funciones.reactivateEnMikrotik(cliente);
+                mikrotikMsg = " | MikroTik: removido de Morosos";
+            } catch (Exception e) {
+                mikrotikMsg = " | MikroTik NO disponible: " + e.getMessage();
                 log.warn("[REACTIVAR_FORZADO] MikroTik no disponible para {}: {}", nombres, e.getMessage());
             }
-            return ok("REACTIVAR_FORZADO", nombres + " reactivado sin pago (forzado)");
+            return ok("REACTIVAR_FORZADO", nombres + " reactivado sin pago (forzado)" + mikrotikMsg);
         } catch (Exception e) {
             return error("REACTIVAR_FORZADO", "Error al reactivar cliente " + id, e);
         }
@@ -344,6 +367,44 @@ public class ApiController {
     }
 
     // ==================== FACTURAS ====================
+
+    @PostMapping("/facturas/cliente/{clienteId}")
+    public ResponseEntity<Map<String, String>> facturarCliente(@PathVariable int clienteId) {
+        try {
+            Cliente cliente = clienteService.findById(clienteId);
+            String nombres = cliente.getNombres() + " " + cliente.getApellidos();
+
+            java.util.Calendar venc = java.util.Calendar.getInstance();
+            venc.set(java.util.Calendar.DAY_OF_MONTH, cliente.getDiapago());
+
+            org.wispcrm.modelo.facturas.Factura factura = new org.wispcrm.modelo.facturas.Factura();
+            factura.setCliente(cliente);
+            factura.setFechapago(venc.getTime());
+            factura.setFechavencimiento(venc.getTime());
+            factura.setValor(cliente.getPlanes().getPrecio());
+            factura.setNotificacion(0);
+            factura.setPeriodo(java.time.LocalDate.now().getMonthValue());
+            facturaDao.save(factura);
+
+            String msg = String.format(
+                "\uD83D\uDCCB *Nueva Factura Generada*\n\n" +
+                "Estimado(a) %s,\n\n" +
+                "Se ha generado su factura #%d por valor de *$%s*.\n" +
+                "Fecha l\u00edmite de pago: *%s*\n\n" +
+                "Realice su pago a trav\u00e9s de:%s\nAtt. SYSRED",
+                nombres,
+                factura.getId(),
+                String.format("%,.0f", factura.getValor()),
+                new java.text.SimpleDateFormat("dd/MM/yyyy").format(venc.getTime()),
+                org.wispcrm.utils.ConstantMensaje.MEDIOS_DE_PAGO
+            );
+            whatsappService.sendSimpleMessageWasenderapi(cliente.getTelefono(), msg);
+
+            return ok("FACTURAR_CLIENTE", "Factura #" + factura.getId() + " generada y notificada a " + nombres);
+        } catch (Exception e) {
+            return error("FACTURAR_CLIENTE", "Error al facturar cliente " + clienteId, e);
+        }
+    }
 
     @PostMapping("/facturas/lote")
     public ResponseEntity<Map<String, Object>> facturarEnLote() {
@@ -551,6 +612,33 @@ public class ApiController {
         }
         log.info("[ELIMINAR_BATCH] Eliminadas: {} | Fallidas: {}", ok, fail);
         return ResponseEntity.ok(Map.of("status", "ok", "message", ok + " facturas eliminadas" + (fail > 0 ? ", " + fail + " fallidas" : "")));
+    }
+
+    @PutMapping("/facturas/batch/aviso-suspension")
+    public ResponseEntity<Map<String, Object>> avisoBatch(@RequestBody List<Integer> ids) {
+        int ok = 0, fail = 0;
+        java.time.LocalDate manana = java.time.LocalDate.now().plusDays(1);
+        String fechaSuspension = manana.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        for (int id : ids) {
+            try {
+                org.wispcrm.modelo.facturas.Factura f = facturaDao.findById(id).orElse(null);
+                if (f == null) { fail++; continue; }
+                String nombres = f.getCliente().getNombres() + " " + f.getCliente().getApellidos();
+                int mora = (int) ((System.currentTimeMillis() - f.getFechavencimiento().getTime()) / (1000 * 60 * 60 * 24));
+                String msg = String.format(
+                    "\u26A0\uFE0F *AVISO DE SUSPENSI\u00d3N*\n\n" +
+                    "Estimado(a) %s,\n\n" +
+                    "Su servicio de internet se encuentra en mora de *%d d\u00edas*.\n\n" +
+                    "Si no realiza el pago antes del *%s*, su servicio ser\u00e1 *autosuspendido*.\n\n" +
+                    "Para evitar la suspensi\u00f3n, realice su pago:%s\nAtt. SYSRED",
+                    nombres, mora, fechaSuspension, org.wispcrm.utils.ConstantMensaje.MEDIOS_DE_PAGO
+                );
+                whatsappService.sendSimpleMessageWasenderapi(f.getCliente().getTelefono(), msg);
+                ok++;
+            } catch (Exception e) { fail++; log.error("[AVISO_SUSPENSION] Error factura {}: {}", id, e.getMessage()); }
+        }
+        log.info("[AVISO_SUSPENSION] Enviados: {} | Fallidos: {}", ok, fail);
+        return ResponseEntity.ok(Map.of("status", "ok", "message", ok + " avisos enviados" + (fail > 0 ? ", " + fail + " fallidos" : "")));
     }
 
     @PutMapping("/facturas/batch/recordar")

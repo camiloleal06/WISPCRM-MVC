@@ -139,7 +139,7 @@ public class Funciones extends Conectar {
         }
         try {
             List<Map<String, String>> existing = con.execute(
-                    "/ip/firewall/address-list/print where address=" + ip + " list=Moroso");
+                    "/ip/firewall/address-list/print where address=" + ip + " and list=Moroso");
             if (!existing.isEmpty()) {
                 con.execute("/ip/firewall/address-list/remove .id=" + existing.get(0).get(".id"));
                 log.info("Cliente removido de Morosos: {} ({})", cliente.getNombres(), ip);

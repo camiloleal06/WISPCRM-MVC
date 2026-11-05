@@ -39,6 +39,7 @@ const FacturasPage = {
                     <button class="btn btn-primary btn-sm" onclick="FacturasPage.batchPagar()"><i class="fas fa-money-bill mr-1"></i>Pagar</button>
                     <button class="btn btn-info btn-sm" onclick="FacturasPage.batchRecordar()"><i class="fas fa-bell mr-1"></i>Recordar</button>
                     ${Utils.isAdmin() ? '<button class="btn btn-dark btn-sm" onclick="FacturasPage.batchSuspender()"><i class="fas fa-ban mr-1"></i>Suspender</button>' : ''}
+                    ${Utils.isAdmin() ? '<button class="btn btn-warning btn-sm" onclick="FacturasPage.batchAvisoSuspension()"><i class="fas fa-exclamation-triangle mr-1"></i>Aviso Suspensión</button>' : ''}
                     ${Utils.isAdmin() ? '<button class="btn btn-danger btn-sm" onclick="FacturasPage.batchEliminar()"><i class="fas fa-trash mr-1"></i>Eliminar</button>' : ''}
                     <button class="btn btn-secondary btn-sm" onclick="FacturasPage.clearSelection()"><i class="fas fa-times"></i></button>
                 </div>
@@ -147,6 +148,13 @@ const FacturasPage = {
         const ids = this.getSelectedIds();
         const res = await Utils.confirmAndRun(`¿Enviar ${ids.length} recordatorios?`, 'Se enviará WhatsApp a cada cliente.', `Enviando ${ids.length} recordatorios...`,
             () => API.put('/facturas/batch/recordar', ids));
+        if (res) { Utils.notify(res.message); Router.navigate('#/facturas'); }
+    },
+
+    async batchAvisoSuspension() {
+        const ids = this.getSelectedIds();
+        const res = await Utils.confirmAndRun(`⚠️ ¿Enviar aviso de suspensión a ${ids.length} clientes?`, 'Se notificará por WhatsApp que su servicio será suspendido mañana.', `Enviando ${ids.length} avisos...`,
+            () => API.put('/facturas/batch/aviso-suspension', ids));
         if (res) { Utils.notify(res.message); Router.navigate('#/facturas'); }
     },
 

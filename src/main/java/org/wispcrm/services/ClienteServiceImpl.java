@@ -41,7 +41,7 @@ public class ClienteServiceImpl implements ClienteInterface {
     }
 
     @Override
-    @CacheEvict(value = "lista-clientes", allEntries = true, beforeInvocation = true)
+    @CacheEvict(value = {"lista-clientes", "clienteId"}, allEntries = true, beforeInvocation = true)
     public void save(Cliente cliente) {
         clienteDao.save(cliente);
     }

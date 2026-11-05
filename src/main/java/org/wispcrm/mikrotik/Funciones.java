@@ -42,10 +42,13 @@ public class Funciones extends Conectar {
                     "/ppp/secret/print where name=\"" + cliente.getPppoeUser() + "\"");
 
             if (result == null || result.isEmpty()) {
+                String comment = (cliente.getNombres() + " " + cliente.getIpAddress() + " via App")
+                        .replaceAll("[^a-zA-Z0-9._\\- ]", "_");
                 con.execute("/ppp/secret/add name=" + cliente.getPppoeUser()
                         + " password=" + cliente.getPppoePass()
                         + " profile=" + profile.getName()
                         + " remote-address=" + cliente.getIpAddress()
+                        + " comment=\"" + comment + "\""
                         + " service=pppoe");
                 log.info("PPPoE creado: {}", cliente.getPppoeUser());
             } else {
@@ -53,6 +56,43 @@ public class Funciones extends Conectar {
             }
         } catch (Exception e) {
             log.error("Error creando PPPoE: {}", cliente.getPppoeUser(), e);
+            throw e;
+        } finally {
+            disconnect();
+        }
+    }
+
+    public void updatePPPoE(Profile profile, Cliente cliente) throws MikrotikApiException {
+        if (!connect()) {
+            log.error("No hay conexión con Mikrotik");
+            return;
+        }
+        try {
+            List<Map<String, String>> result = con.execute(
+                    "/ppp/secret/print where name=\"" + cliente.getPppoeUser() + "\"");
+            String comment = (cliente.getNombres() + " " + cliente.getIpAddress() + " via App")
+                    .replaceAll("[^a-zA-Z0-9._\\- ]", "_");
+            if (result == null || result.isEmpty()) {
+                // No existe, lo crea
+                con.execute("/ppp/secret/add name=" + cliente.getPppoeUser()
+                        + " password=" + cliente.getPppoePass()
+                        + " profile=" + profile.getName()
+                        + " remote-address=" + cliente.getIpAddress()
+                        + " comment=\"" + comment + "\""
+                        + " service=pppoe");
+                log.info("PPPoE creado (desde edición): {}", cliente.getPppoeUser());
+            } else {
+                // Existe, lo actualiza
+                String secretId = result.get(0).get(".id");
+                con.execute("/ppp/secret/set .id=" + secretId
+                        + " password=" + cliente.getPppoePass()
+                        + " profile=" + profile.getName()
+                        + " remote-address=" + cliente.getIpAddress()
+                        + " comment=\"" + comment + "\"");
+                log.info("PPPoE actualizado: {}", cliente.getPppoeUser());
+            }
+        } catch (Exception e) {
+            log.error("Error actualizando PPPoE: {}", cliente.getPppoeUser(), e);
             throw e;
         } finally {
             disconnect();
@@ -75,10 +115,9 @@ public class Funciones extends Conectar {
             boolean yaEstaEnMoroso = existing.stream()
                     .anyMatch(e -> "Moroso".equals(e.get("list")));
             if (!yaEstaEnMoroso) {
-                String user = cliente.getPppoeUser();
-                String comment = (user != null && !user.isBlank()) ? user : cliente.getNombres();
-                comment = comment.replaceAll("[^a-zA-Z0-9._\\-]", "_");
-                con.execute("/ip/firewall/address-list/add address=" + ip + " list=Moroso comment=" + comment);
+                String comment = (cliente.getNombres() + " via App")
+                        .replaceAll("[^a-zA-Z0-9._\\- ]", "_");
+                con.execute("/ip/firewall/address-list/add address=" + ip + " list=Moroso comment=\"" + comment + "\"");
                 log.info("Cliente suspendido en MikroTik: {} ({})", cliente.getNombres(), ip);
             } else {
                 log.info("Cliente ya está en lista Morosos: {}", cliente.getNombres());

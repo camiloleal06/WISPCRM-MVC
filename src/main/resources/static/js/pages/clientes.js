@@ -65,7 +65,7 @@ const ClientesPage = {
                 <a href="#/clientes/${c.id}" class="btn btn-info btn-sm" title="Ver"><i class="fas fa-eye"></i></a>
                 ${Utils.isAdmin() ? `<a href="#/clientes/${c.id}/editar" class="btn btn-warning btn-sm" title="Editar"><i class="fas fa-user-edit"></i></a>` : ''}
                 ${c.estado === 'ACTIVO' ? `
-                    <a href="/facturar/${c.id}" class="btn btn-success btn-sm" title="Facturar"><i class="fas fa-file-invoice"></i></a>
+                    <button class="btn btn-success btn-sm" onclick="ClientesPage.facturar(${c.id})" title="Facturar"><i class="fas fa-file-invoice"></i></button>
                     ${Utils.isAdmin() ? `<button class="btn btn-dark btn-sm" onclick="ClientesPage.suspender(${c.id})" title="Suspender"><i class="fas fa-ban"></i></button>` : ''}
                     ${Utils.isAdmin() ? `<button class="btn btn-danger btn-sm" onclick="ClientesPage.eliminar(${c.id})" title="Desactivar"><i class="fas fa-user-minus"></i></button>` : ''}
                 ` : ''}
@@ -78,6 +78,15 @@ const ClientesPage = {
                 ` : ''}
             </td>
         </tr>`;
+    },
+
+    async facturar(id) {
+        const res = await Utils.confirmAndRun('¿Generar factura?', 'Se creará la factura y se notificará al cliente por WhatsApp.', 'Generando factura...',
+            () => API.post('/facturas/cliente/' + id));
+        if (res) {
+            if (res.status === 'ok') Utils.notify(res.message);
+            else Utils.notify(res?.message || 'Error al facturar', 'error');
+        }
     },
 
     async eliminar(id) {

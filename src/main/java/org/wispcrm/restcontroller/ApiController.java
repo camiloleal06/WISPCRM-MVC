@@ -14,6 +14,7 @@ import org.wispcrm.modelo.red.DireccionIp;
 import org.wispcrm.interfaces.PlanInterface;
 import org.wispcrm.interfaces.ProfileInterface;
 import org.wispcrm.mikrotik.Funciones;
+import org.wispcrm.mikrotik.MikrotikGateway;
 import org.wispcrm.interfaces.OrdenInterface;
 import org.wispcrm.modelo.clientes.Cliente;
 import org.wispcrm.modelo.clientes.ClienteDTO;
@@ -50,7 +51,7 @@ public class ApiController {
     private final InterfacePagos pagosDao;
     private final PlanInterface planService;
     private final ProfileInterface profileService;
-    private final Funciones funciones;
+    private final MikrotikGateway funciones;
     private final WhatsappMessageService whatsappService;
     private final OrdenInterface ordenService;
     private final DireccionIpDao direccionIpDao;
@@ -738,6 +739,18 @@ public class ApiController {
             return ok("GUARDAR_PLAN", "Plan " + plan.getNombre() + " guardado");
         } catch (Exception e) {
             return error("GUARDAR_PLAN", "Error al guardar plan", e);
+        }
+    }
+
+    @GetMapping("/mikrotik/profiles")
+    public ResponseEntity<?> mikrotikProfiles() {
+        try {
+            return ResponseEntity.ok(Map.of(
+                "mikrotikProfiles", funciones.listPPPoEProfiles(),
+                "dbProfiles", profileService.findAll()
+            ));
+        } catch (Exception e) {
+            return error("MIKROTIK_PROFILES", "Error consultando profiles de MikroTik", e);
         }
     }
 

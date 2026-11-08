@@ -88,3 +88,4 @@ mikrotik :
   host: "${MIKROTIK_HOST:192.168.222.2}"
   username: "${MIKROTIK_USER:api}"
   password: "${MIKROTIK_PASS:api}"
+  pppoe-profile: "${MIKROTIK_PPPOE_PROFILE:CLIENTES30}"

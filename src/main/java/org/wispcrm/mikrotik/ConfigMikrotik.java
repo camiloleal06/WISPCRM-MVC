@@ -15,4 +15,6 @@ public class ConfigMikrotik {
     private String username;
     @Value("${mikrotik.password}")
     private String password;
+    @Value("${mikrotik.pppoe-profile}")
+    private String pppoeProfile;
 }

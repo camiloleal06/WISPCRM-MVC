@@ -23,6 +23,10 @@ abstract class Conectar {
         return configMikrotik.getHost();
     }
 
+    protected String getConfigPppoeProfile() {
+        return configMikrotik.getPppoeProfile();
+    }
+
     protected boolean connect() throws MikrotikApiException {
         String host = configMikrotik.getHost();
         String user = configMikrotik.getUsername();

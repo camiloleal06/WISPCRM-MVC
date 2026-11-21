@@ -16,13 +16,6 @@ spring:
       name: ./sysred.log
     level:
       root: INFO
-  # Thymeleaf Configuration
-  thymeleaf:
-    mode: HTML
-    cache: true
-    encoding: UTF-8
-    servlet:
-      content-type: text/html
   datasource:
     url: jdbc:mysql://74.208.118.100/sysred2023?useSSL=false&serverTimezone=UTC&useLegacyDatetimeCode=false
     username: camiloleal

@@ -3,6 +3,6 @@ spring:
     activate:
       on-profile: dev
 mikrotik:
-  host: "10.10.2.1"
+  host: "181.129.193.242"
   username: "api"
   password: "api"

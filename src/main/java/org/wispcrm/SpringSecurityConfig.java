@@ -1,6 +1,7 @@
 package org.wispcrm;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -10,10 +11,14 @@ import org.springframework.security.core.userdetails.User.UserBuilder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.wispcrm.modelo.AppUser;
 import org.wispcrm.utils.LoginSuccessHandler;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @Configuration
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -24,24 +29,39 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+                .cors().and()
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/dist/**", "/plugins/**", "/css/**", "/js/**", "/manifest.json", "/sw.js").permitAll()
-                .antMatchers("/descargarfactura/**", "/descargarorden/**", "/descargarpago/**").permitAll()
-                .antMatchers("/login").permitAll()
+                .antMatchers("/login.html", "/login", "/css/**", "/js/**",
+                        "/plugins/**", "/dist/**", "/manifest.json", "/sw.js",
+                        "/descargarfactura/**", "/descargarorden/**", "/descargarpago/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
-                .loginPage("/login")
+                .loginPage("/login.html")
                 .loginProcessingUrl("/login")
                 .successHandler(successHandler)
-                .failureUrl("/login?error=true")
+                .failureUrl("/login.html?error=true")
                 .permitAll()
                 .and()
-                .logout().logoutSuccessUrl("/login?logout=true").permitAll()
+                .logout()
+                .logoutSuccessUrl("/login.html?logout=true")
+                .permitAll()
                 .and()
                 .exceptionHandling()
                 .authenticationEntryPoint(authEntryPoint());
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOriginPatterns(List.of("*"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 
     private AuthenticationEntryPoint authEntryPoint() {
@@ -56,7 +76,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 response.setContentType("application/json");
                 response.getWriter().write("{\"status\":\"error\",\"message\":\"Sesion expirada\"}");
             } else {
-                response.sendRedirect("/login");
+                response.sendRedirect("/login.html");
             }
         };
     }
@@ -65,7 +85,6 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     public void configurerGlobal(AuthenticationManagerBuilder build) throws Exception {
         PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
         UserBuilder users = User.builder().passwordEncoder(encoder::encode);
-
         for (AppUser appUser : AppUser.values()) {
             build.inMemoryAuthentication().withUser(
                     users.username(appUser.getUsername())

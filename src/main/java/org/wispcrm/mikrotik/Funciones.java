@@ -35,7 +35,7 @@ public class Funciones extends Conectar implements MikrotikGateway {
     private String pppoeProfile() { return super.getConfigPppoeProfile(); }
 
     public void addPPPoE(Profile profile, Cliente cliente) throws MikrotikApiException {
-        if (!connect()) { log.error("No hay conexión con Mikrotik"); return; }
+        if (!connect()) { log.error("No conexión con Mikrotik"); return; }
         try {
             List<Map<String, String>> result = con.execute(
                     "/ppp/secret/print where name=" + cliente.getPppoeUser());
